@@ -159,7 +159,7 @@ class LineTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y, self.end_point.handle, self.curr_line.handle)
 
-        if items and items.get('Point'):
+        if items.get('Point'):
             point_handle = items['Point'][0]
             self.curr_line.change_parent(1, graphics[point_handle])
             self.end_point.delete()
@@ -182,11 +182,7 @@ class CircleTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x,y)
 
-        if not items:
-            center_point = add_graphic(g.Point, x,y)
-            radius_point = self.radius_point = add_graphic(g.Point, x,y)
-            self.curr_circle = add_graphic(g.Circle, center_point, radius_point)
-        elif items.get('Point'):
+        if items.get('Point'):
             center_handle = items['Point'][0]
             center_point = graphics[center_handle]
             radius_point = self.radius_point = add_graphic(g.Point, x, y)
