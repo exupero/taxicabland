@@ -25,7 +25,7 @@ def under_cursor(x,y, *discount):
         x + size, y + size)
 
     if over_items == (1,): # only the grid was found
-        return None
+        return {}
 
     over_items = list(over_items)
 
