@@ -104,9 +104,9 @@ class PointTool(Tool):
 
         if not items:
             add_graphic(g.Point, x, y)
-        elif items['Point']:
+        elif items.get('Point'):
             pass
-        elif items['Line']:
+        elif items.get('Line'):
             line_handle = items['Line'][0]
             line = graphics[line_handle]
             add_graphic(g.PointOnLine, line, x, y)
@@ -118,7 +118,7 @@ class PointTool(Tool):
         x, y = event.x, event.y
         items = self.items
 
-        if items and items['Point']:
+        if items and items.get('Point'):
             point_handle = items['Point'][0]
             point = graphics[point_handle]
             point.set_coord(x, y)
@@ -146,7 +146,7 @@ class LineTool(Tool):
             start_point = add_graphic(g.Point, x, y)
             end_point = self.end_point = add_graphic(g.Point, x, y)
             self.curr_line = add_graphic(g.Line, start_point, end_point)
-        elif items['Point']:
+        elif items.get('Point'):
             start_handle = items['Point'][0]
             start_point = graphics[start_handle]
             end_point = self.end_point = add_graphic(g.Point, x, y)
@@ -166,7 +166,7 @@ class LineTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y, self.end_point.handle, self.curr_line.handle)
 
-        if items and items['Point']:
+        if items and items.get('Point'):
             point_handle = items['Point'][0]
             self.curr_line.change_parent(1, graphics[point_handle])
             self.end_point.delete()
@@ -193,7 +193,7 @@ class CircleTool(Tool):
             center_point = add_graphic(g.Point, x,y)
             radius_point = self.radius_point = add_graphic(g.Point, x,y)
             self.curr_circle = add_graphic(g.Circle, center_point, radius_point)
-        elif items['Point']:
+        elif items.get('Point'):
             center_handle = items['Point'][0]
             center_point = graphics[center_handle]
             radius_point = self.radius_point = add_graphic(g.Point, x, y)
@@ -211,11 +211,9 @@ class CircleTool(Tool):
     def left_release(self, event):
         '''Finish creating the circle.'''
         x, y = event.x, event.y
-
-        # Get the items under the cursor.
         items = under_cursor(x, y, self.radius_point.handle, self.curr_circle.handle)
 
-        if items and items['Point']:
+        if items and items.get('Point'):
             point_handle = items['Point'][0]
             self.curr_circle.change_parent(1, graphics[point_handle])
             self.radius_point.delete()
@@ -246,7 +244,7 @@ class EllipseTool(Tool):
                 f2 = self.f2 = add_graphic(g.Point, x, y)
                 k_point = self.k_point = add_graphic(g.Point, x, y)
                 self.curr_ellipse = add_graphic(g.Ellipse, self.f1, f2, k_point)
-        elif items['Point']:
+        elif items.get('Point'):
             point_handle = items['Point'][0]
 
             if not self.f1:
@@ -276,7 +274,7 @@ class EllipseTool(Tool):
             x, y = event.x, event.y
             items = under_cursor(x, y, self.k_point.handle, self.curr_ellipse.handle)
 
-            if items and items['Point']:
+            if items and items.get('Point'):
                 point_handle = items['Point'][0]
                 self.curr_ellipse.change_parent(2, graphics[point_handle])
                 self.k_point.delete()
@@ -293,7 +291,7 @@ class MidpointTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if items and items['Line']:
+        if items and items.get('Line'):
             line_handle = items['Line'][0]
             mid_point = add_graphic(g.PointOnLine, graphics[line_handle], x, y, .5, locked=True)
 
@@ -312,7 +310,7 @@ class MidsetTool(Tool):
         '''Create the midset of two points.'''
         items = under_cursor(event.x, event.y)
 
-        if items and items['Point']:
+        if items and items.get('Point'):
             point_handle = items['Point'][0]
 
             if not self.p1:
@@ -339,7 +337,7 @@ class PerpendicularTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if items and items['Line']:
+        if items and items.get('Line'):
             line_handle = items['Line'][0]
             line = self.line = graphics[line_handle]
             self.p = add_graphic(g.Point, x, y)
@@ -355,7 +353,7 @@ class PerpendicularTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y, self.p.handle)
 
-        if items and items['Point']:
+        if items and items.get('Point'):
             point_handle = items['Point'][0]
             self.curr_perp.change_parent(1, graphics[point_handle])
             self.p.delete()
@@ -378,7 +376,7 @@ class ParallelTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if items and items['Line']:
+        if items and items.get('Line'):
             line_handle = items['Line'][0]
             line = self.line = graphics[line_handle]
             self.p = add_graphic(g.Point, x, y)
@@ -395,7 +393,7 @@ class ParallelTool(Tool):
             x, y = event.x, event.y
             items = under_cursor(x, y, self.p.handle)
 
-            if items and items['Point']:
+            if items and items.get('Point'):
                 point_handle = items['Point'][0]
                 self.curr_parallel.change_parent(1, graphics[point_handle])
                 self.p.delete()
@@ -427,7 +425,7 @@ class ParabolaTool(Tool):
                 end_point = self.end_point = add_graphic(g.Point, x, y)
                 self.directrix = add_graphic(g.Line, start_point, end_point)
                 self.curr_parabola = add_graphic(g.Parabola, self.focus, self.directrix)
-        elif items['Point']:
+        elif items.get('Point'):
             point_handle = items['Point'][0]
 
             if not self.focus:
@@ -438,7 +436,7 @@ class ParabolaTool(Tool):
                 end_point = self.end_point = add_graphic(g.Point, x, y)
                 self.directrix = add_graphic(g.Line, start_point, end_point)
                 self.curr_parabola = add_graphic(g.Parabola, self.focus, self.directrix)
-        elif items['Line']:
+        elif items.get('Line'):
             line_handle = items['Line'][0]
 
             if not self.directrix:
@@ -469,7 +467,7 @@ class ParabolaTool(Tool):
             else:
                 items = under_cursor(x, y, self.directrix.handle)
 
-            if items and items['Point']:
+            if items and items.get('Point'):
                 point_handle = items['Point'][0]
                 self.curr_parabola.parents[1].change_parent(1, graphics[point_handle])
                 self.end_point.delete()
@@ -500,7 +498,7 @@ class HyperbolaTool(Tool):
                 f2 = self.f2 = add_graphic(g.Point, x,y)
                 k_point = self.k_point = add_graphic(g.Point, x,y)
                 self.curr_hyperbola = add_graphic(g.Hyperbola, self.f1, f2, k_point)
-        elif items['Point']:
+        elif items.get('Point'):
             point_handle = items['Point'][0]
 
             if not self.f1:
@@ -530,7 +528,7 @@ class HyperbolaTool(Tool):
             x, y = event.x, event.y
             items = under_cursor(x, y, self.k_point.handle)
 
-            if items and items['Point']:
+            if items and items.get('Point'):
                 point_handle = items['Point'][0]
                 self.curr_hyperbola.change_parent(2, graphics[point_handle])
                 self.k_point.delete()
@@ -555,7 +553,7 @@ class BisectTool(Tool):
         '''Pick points that form an angle.'''
         items = under_cursor(event.x, event.y)
 
-        if items and items['Point']:
+        if items and items.get('Point'):
             point_handle = items['Point'][0]
 
             if not self.r1:
@@ -594,9 +592,9 @@ class MindistTool(Tool):
         items = under_cursor(event.x, event.y)
 
         if items:
-            if items['Point']:
+            if items.get('Point'):
                 point_handle = items['Point'][0]
                 self.loci.append(graphics[point_handle])
-            elif items['Button']:
+            elif items.get('Button'):
                 add_graphic(g.Mindist, self.loci)
                 self.loci = []
