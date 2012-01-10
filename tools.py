@@ -598,9 +598,10 @@ class MindistTool(Tool):
         '''Select points to find the minimum distance from.'''
         items = under_cursor(event.x, event.y)
 
-        if items and items['Point']:
-            point_handle = items['Point'][0]
-            self.loci.append(graphics[point_handle])
-        elif items['Button']:
-            add_graphic(g.Mindist, self.loci)
-            self.loci = []
+        if items:
+            if items['Point']:
+                point_handle = items['Point'][0]
+                self.loci.append(graphics[point_handle])
+            elif items['Button']:
+                add_graphic(g.Mindist, self.loci)
+                self.loci = []
