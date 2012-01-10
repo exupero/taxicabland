@@ -1,4 +1,4 @@
-from itertools import cycle
+from utils import current_color, dist, find_intersect, find_intersection
 
 
 c = None
@@ -20,106 +20,6 @@ ops = (
 )
 
 
-def dist(a, b):
-    def point_point():
-        ax, ay = a
-        bx, by = b
-        return abs(ax - bx) + abs(ay - by)
-
-    def point_line(a, line):
-        ax, ay = a
-        # Calculate the distance between the point and the line horizontally and vertically.
-
-        # Get the line's parents' positions.
-        cx, cy = line.parents[0].coord
-        dx, dy = line.parents[1].coord
-
-        if cx - dx and cy - dy:
-            # Calculate the slope and y-intercept of the line.
-            slope = float(cy - dy) / (cx - dx)
-            intercept = cy - slope * cx
-
-            # Calculate the points on the line given the point not on the line.
-            y = slope * ax + intercept
-            x = (ay - intercept) / slope
-
-            # Determine the distance between (x,ay) and (ax,ay), (ax,y) and (ax,ay).
-            hdist = dist((x,ay), (ax,ay))
-            vdist = dist((ax,y), (ax,ay))
-
-            return min(hdist,vdist)
-        elif not cx - dx:
-            # The line is vertical, return the horizontal distance.
-            return dist((cx,ay), (ax,ay))
-        elif not cy - dy:
-            # The line is horizontal, return the vertical distance.
-            return dist((ax,cy), (ax,ay))
-
-    if isinstance(a, tuple) and isinstance(b, tuple):
-        return point_point()
-    elif isinstance(a, Line) and isinstance(b, tuple):
-        return point_line(b,a)
-    elif isinstance(a, tuple) and isinstance(b, Line):
-        return point_line(a,b)
-
-
-def find_intersection((a1, b1), (a2, b2)):
-    a1x, a1y = a1
-    b1x, b1y = b1
-    a2x, a2y = a2
-    b2x, b2y = b2
-
-    if a1x - b1x and a2x - b2x:
-        m1 = float(a1y - b1y) / (a1x - b1x)
-        int1 = a1y - m1 * a1x
-
-        m2 = float(a2y - b2y) / (a2x - b2x)
-        int2 = a2y - m2 * a2x
-
-        if m1 - m2:
-            ix = float(int2 - int1) / (m1 - m2)
-            iy = m1 * ix + int1
-        elif m1 == m2:
-            return
-    elif a1x == b1x:
-        m2 = float(a2y - b2y) / (a2x - b2x)
-        int2 = a2y - m2 * a2x
-
-        ix = a1x
-        iy = m2 * ix + int2
-    elif a2x == b2x:
-        m1 = float(a1y - b1y) / (a1x - b1x)
-        int1 = a1y - m1 * a1x
-
-        ix = a2x
-        iy = m1 * ix + int1
-
-    return ix, iy
-
-
-def find_intersect(a, b, depth, *bounds):
-    if depth > 10 or abs(bounds[0] - bounds[2]) < 5 or abs(bounds[1] - bounds[3]) < 5:
-        x = (x1 + x2) * .5
-        y = (y1 + y2) * .5
-        return x, y
-
-    box = c.find_overlapping(*bounds)
-
-    q1bounds = bounds[0], bounds[1], bounds[2] * .5, bounds[3] * .5
-    q2bounds = bounds[2] * .5, bounds[1], bounds[2], bounds[3] * .5
-    q3bounds = bounds[0], bounds[3] * .5, bounds[2] * .5, bounds[3]
-    q4bounds = bounds[2] * .5, bounds[3] * .5, bounds[2], bounds[3]
-
-
-current_color = cycle([
-    '#00cc00', # Green
-    '#3300ff', # Blue
-    '#ff9900', # Orange
-    '#ff33cc', # Pink
-    '#00ffff', # Cyan
-])
-
-
 class Operations(object):
     def __init__(self, master):
         self.__children = []
@@ -131,15 +31,9 @@ class Operations(object):
 
     def change_parent(self, index, new_parent):
         master = self.__master
-
-        # Remove the master from the old parent's children.
         master.parents[index].remove_child(master)
-
-        # Set the master's parent index to be the new parent.
         master.parents[index] = new_parent
-        # Add the master as the new parent's child.
         master.parents[index].add_child(master)
-
         master.update()
 
     def add_child(self, child):
@@ -178,7 +72,15 @@ class Operations(object):
             getattr(master, 'delete_extras')()
 
 
-class Point(object):
+class Graphic(object):
+    def __getattr__(self, attr):
+        if attr in ops and hasattr(self.operations, attr):
+            return getattr(self.operations, attr)
+        else:
+            raise AttributeError(attr)
+
+
+class Point(Graphic):
     size = 5
 
     new_specs = {
@@ -195,16 +97,10 @@ class Point(object):
 
     def __init__(self, x, y):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = []
         self.coord = x,y
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def set_coord(self, x, y):
         self.coord = x, y
@@ -222,7 +118,7 @@ class Point(object):
         self.notify()
 
 
-class PointOnLine(object):
+class PointOnLine(Graphic):
     size = 5
 
     new_specs = {
@@ -233,7 +129,7 @@ class PointOnLine(object):
 
     def __init__(self, line, x, y, position=None, locked=False):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [line]
         self.become_child()
 
@@ -252,12 +148,6 @@ class PointOnLine(object):
 
         self.locked = locked
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def set_coord(self, x,y):
         self.coord = x,y
@@ -294,7 +184,7 @@ class PointOnLine(object):
         self.notify()
 
 
-class PointOfIntersection(object):
+class PointOfIntersection(Graphic):
     size = 5
 
     new_specs = {
@@ -305,17 +195,11 @@ class PointOfIntersection(object):
 
     def __init__(self, (x, y), object1, object2):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [object1, object2]
         self.become_child()
         self.coord = x, y
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         a, b = self.parents
@@ -327,7 +211,7 @@ class PointOfIntersection(object):
         self.notify()
 
 
-class Line(object):
+class Line(Graphic):
     new_specs = {
         'width': 2,
         'tags': 'Line'}
@@ -340,17 +224,11 @@ class Line(object):
 
     def __init__(self, a, b):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [a,b]
         self.become_child()
         self.lower()
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def qualifies(self, x, y):
         a,b = self.__parents
@@ -371,7 +249,7 @@ class Line(object):
         self.notify()
 
 
-class Circle(object):
+class Circle(Graphic):
     new_specs = {
         'width': 2,
         'tags': 'Circle'}
@@ -384,18 +262,12 @@ class Circle(object):
 
     def __init__(self, center_point, radius_point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [center_point, radius_point]
         self.radius = dist(*self.parents)
         self.become_child()
         self.lower()
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def quality(self, point):
         center = self.center.coord
@@ -416,7 +288,7 @@ class Circle(object):
         self.notify()
 
 
-class Ellipse(object):
+class Ellipse(Graphic):
     new_specs = {
         'width': 2,
         'tags': 'Ellipse'}
@@ -435,7 +307,7 @@ class Ellipse(object):
     def __init__(self, focus1, focus2, k_point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.tielines = c.create_line(0, 0, 0, 0, **self.tieline_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [focus1, focus2, k_point]
         self.k = dist(focus1.coord, k_point.coord) + dist(focus2.coord, k_point.coord)
         self.become_child()
@@ -443,12 +315,6 @@ class Ellipse(object):
         c.lower(self.tielines)
         c.lower(1) # the grid
         self.update()
-
-    def __getattr__(self, attr):
-        if hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def quality(self, point):
         focus1, focus2, k = self.focus1, self.focus2, self.k
@@ -498,7 +364,7 @@ class Ellipse(object):
         c.delete(self.tielines)
 
 
-class Midset(object):
+class Midset(Graphic):
     new_specs = {
         'fill': 'blue',
         'width': 2,
@@ -514,7 +380,7 @@ class Midset(object):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
         self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [a,b]
         self.become_child()
         c.lower(self.handle)
@@ -522,12 +388,6 @@ class Midset(object):
         c.lower(self.block2)
         c.lower(1) # the grid
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         p1, p2 = self.parents
@@ -625,7 +485,7 @@ class Midset(object):
         c.delete(self.block2)
 
 
-class Perpendicular(object):
+class Perpendicular(Graphic):
     new_specs = {
         'fill': 'blue',
         'width': 2,
@@ -641,7 +501,7 @@ class Perpendicular(object):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
         self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [line, point]
         self.become_child()
         c.lower(self.handle)
@@ -649,12 +509,6 @@ class Perpendicular(object):
         c.lower(self.block2)
         c.lower(1) # the grid
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         line, p = self.parents
@@ -779,7 +633,7 @@ class Perpendicular(object):
         c.delete(self.block2)
 
 
-class Parallel(object):
+class Parallel(Graphic):
     new_specs = {
         'fill': 'black',
         'width': 2,
@@ -787,17 +641,11 @@ class Parallel(object):
 
     def __init__(self, line, point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [line, point]
         self.become_child()
         self.lower()
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         line, point = self.parents
@@ -823,7 +671,7 @@ class Parallel(object):
         self.notify()
 
 
-class Parabola(object):
+class Parabola(Graphic):
     new_specs = {
         'fill': 'blue',
         'width': 2,
@@ -831,17 +679,11 @@ class Parabola(object):
 
     def __init__(self, focus, directrix):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [focus, directrix]
         self.become_child()
         self.lower()
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         focus, directrix = self.parents
@@ -912,7 +754,7 @@ class Parabola(object):
         self.notify()
 
 
-class Hyperbola(object):
+class Hyperbola(Graphic):
     mid_specs = {
         'fill': 'blue',
         'width': 2,
@@ -941,7 +783,7 @@ class Hyperbola(object):
             c.create_rectangle(0, 0, 0, 0, **self.arm_specs)]
         self.tielines = c.create_line(0, 0, 0, 0, **self.tieline_specs)
 
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [f1,f2,k_point]
         self.become_child()
 
@@ -951,12 +793,6 @@ class Hyperbola(object):
         c.lower(self.tielines)
         c.lower(1) # the grid
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         focus1, focus2, k_point = self.parents
@@ -1062,7 +898,7 @@ class Hyperbola(object):
         c.delete(self.tielines)
 
 
-class Bisect(object):
+class Bisect(Graphic):
     new_specs = {
         'fill': 'blue',
         'width': 2,
@@ -1070,17 +906,11 @@ class Bisect(object):
 
     def __init__(self, r1, v, r2):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = [r1, v, r2]
         self.become_child()
         self.lower()
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         r1, v, r2 = self.parents
@@ -1174,7 +1004,7 @@ class Bisect(object):
         self.notify()
 
 
-class Mindist(object):
+class Mindist(Graphic):
     new_area = {
         'stipple': 'gray50',
         'width': 0,
@@ -1194,7 +1024,7 @@ class Mindist(object):
             self.new_spot['fill'] = color
             self.handle = c.create_oval(0, 0, 0, 0, **self.new_spot)
 
-        self.__operations = Operations(self)
+        self.operations = Operations(self)
         self.parents = points
         self.become_child()
 
@@ -1203,12 +1033,6 @@ class Mindist(object):
 
         self.lower()
         self.update()
-
-    def __getattr__(self, attr):
-        if attr in ops and hasattr(self.__operations, attr):
-            return getattr(self.__operations, attr)
-        else:
-            raise AttributeError(attr)
 
     def update(self):
         xs = [parent.coord[0] for parent in self.parents]
@@ -1220,9 +1044,7 @@ class Mindist(object):
         xmid = int(len(xs) * .5)
         ymid = int(len(ys) * .5)
 
-        # If there are an even number of points...
         if not len(self.parents) % 2:
-            # Get the middle two points.
             xmid = [xs[xmid-1], xs[xmid]]
             ymid = [ys[ymid-1], ys[ymid]]
 
@@ -1236,8 +1058,6 @@ class Mindist(object):
 
             c.coords(self.handle,
                 xmid[0],ymid[0], xmid[1],ymid[1])
-
-        # If there are an odd number of points...
         elif len(self.parents) % 2:
             xmid = xs[xmid]
             ymid = ys[ymid]
@@ -1252,4 +1072,4 @@ class Mindist(object):
         for parent in self.parents:
             c.itemconfigure(parent.handle, fill='red')
 
-        self.__operations.delete()
+        self.operations.delete()
