@@ -1,6 +1,5 @@
 import Tkinter as tk
 import tkFileDialog
-import Image, ImageDraw
 
 import graphics
 import tools
