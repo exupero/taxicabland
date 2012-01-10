@@ -139,11 +139,7 @@ class LineTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if not items:
-            start_point = add_graphic(g.Point, x, y)
-            end_point = self.end_point = add_graphic(g.Point, x, y)
-            self.curr_line = add_graphic(g.Line, start_point, end_point)
-        elif items.get('Point'):
+        if items.get('Point'):
             start_handle = items['Point'][0]
             start_point = graphics[start_handle]
             end_point = self.end_point = add_graphic(g.Point, x, y)
