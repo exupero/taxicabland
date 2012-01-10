@@ -202,7 +202,7 @@ class CircleTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y, self.radius_point.handle, self.curr_circle.handle)
 
-        if items and items.get('Point'):
+        if items.get('Point'):
             point_handle = items['Point'][0]
             self.curr_circle.change_parent(1, graphics[point_handle])
             self.radius_point.delete()
@@ -225,20 +225,11 @@ class EllipseTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if not items:
-            if not self.f1:
-                self.f1 = add_graphic(g.Point, x, y)
-
-            elif not self.f2:
-                f2 = self.f2 = add_graphic(g.Point, x, y)
-                k_point = self.k_point = add_graphic(g.Point, x, y)
-                self.curr_ellipse = add_graphic(g.Ellipse, self.f1, f2, k_point)
-        elif items.get('Point'):
+        if items.get('Point'):
             point_handle = items['Point'][0]
 
             if not self.f1:
                 self.f1 = graphics[point_handle]
-
             elif not self.f2:
                 f2 = self.f2 = graphics[point_handle]
                 k_point = self.k_point = add_graphic(g.Point, x,y)
@@ -246,7 +237,6 @@ class EllipseTool(Tool):
         else:
             if not self.f1:
                 self.f1 = add_graphic(g.Point, x, y)
-
             elif not self.f2:
                 f2 = self.f2 = add_graphic(g.Point, x, y)
                 k_point = self.k_point = add_graphic(g.Point, x, y)
@@ -263,7 +253,7 @@ class EllipseTool(Tool):
             x, y = event.x, event.y
             items = under_cursor(x, y, self.k_point.handle, self.curr_ellipse.handle)
 
-            if items and items.get('Point'):
+            if items.get('Point'):
                 point_handle = items['Point'][0]
                 self.curr_ellipse.change_parent(2, graphics[point_handle])
                 self.k_point.delete()
