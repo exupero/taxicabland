@@ -577,8 +577,8 @@ class MindistTool(Tool):
 
     def activate(self):
         self.set_help_text(
-            'Click points one at a time, then click 'Finish' to find ' + \
-            'the location of minimum distance to those points.')
+            "Click points one at a time, then click 'Finish' to find " + \
+            "the location of minimum distance to those points.")
 
         self.finish_button = c.create_rectangle(7,40, 80,62, fill='red', width=2, tags='Button')
         self.finish_text = c.create_text(10,40, text='FINISH', anchor=NW, fill='black', font=('Arial','16'), tags='Button')
