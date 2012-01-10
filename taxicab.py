@@ -1,5 +1,4 @@
 import Tkinter as tk
-import tkFileDialog
 
 import graphics
 import tools
@@ -92,11 +91,6 @@ class TaxicabGeometry:
             text='CLEAR',
             command=self.clear_canvas,
             borderwidth=1)
-        save_image = tk.Button(
-            frame,
-            text='SAVE PIC',
-            command=self.save_image,
-            borderwidth=1)
         help_button = tk.Button(
             frame,
             text='HELP',
@@ -167,32 +161,19 @@ class TaxicabGeometry:
     def hide_points(self):
         pass
 
-    def save_image(self):
-        filename = tkFileDialog.asksaveasfilename(
-            defaultextension='.jpg',
-            filetypes=(('Postscript','.ps'),))
-
-        if filename:
-            self.c.postscript(file=filename)
-
     def help_button(self):
-        help = tk.Tk()
-        help.title('Taxicab Geometry v1 help')
+        help_frame = tk.Tk()
+        help_frame.title('Taxicab Geometry v1 help')
 
-        try:
-            help.wm_iconbitmap('taxi.ico')
-        except:
-            pass
-
-        title = tk.Text(help, borderwidth=0, height=5, wrap=tk.WORD)
+        title = tk.Text(help_frame, borderwidth=0, height=5, wrap=tk.WORD)
         title.pack()
 
         title.insert(tk.END, 'TAXICAB GEOMETRY v1', 'title')
 
-        scrollbar = tk.Scrollbar(help)
+        scrollbar = tk.Scrollbar(help_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        text = tk.Text(help, borderwidth=0, wrap=tk.WORD)
+        text = tk.Text(help_frame, borderwidth=0, wrap=tk.WORD)
         text.pack(padx=5, pady=5)
 
         text.insert(tk.END, '\nHow to Use\n','h1')
@@ -235,17 +216,10 @@ class TaxicabGeometry:
         text.config(state=tk.DISABLED, yscrollcommand=scrollbar.set)
         scrollbar.config(command=text.yview)
 
-        help.mainloop()
+        help_frame.mainloop()
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-
-    try:
-        root.wm_iconbitmap('taxi.ico')
-    except:
-        pass
-
     tg = TaxicabGeometry(root)
-
     root.mainloop()

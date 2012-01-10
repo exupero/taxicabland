@@ -96,7 +96,7 @@ class PointTool(Tool):
     items = None
 
     def activate(self):
-        self.set_help_text("Click to create a point. Click and drag to move it.")
+        self.set_help_text('Click to create a point. Click and drag to move it.')
 
     def left_click(self, event):
         x, y = event.x, event.y
@@ -131,7 +131,7 @@ class LineTool(Tool):
     end_point = curr_line = None
 
     def activate(self):
-        self.set_help_text("Click and drag to create a line.")
+        self.set_help_text('Click and drag to create a line.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -178,7 +178,7 @@ class CircleTool(Tool):
     radius_point = curr_circle = None
 
     def activate(self):
-        self.set_help_text("Click and drag to create a circle.")
+        self.set_help_text('Click and drag to create a circle.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -227,7 +227,7 @@ class EllipseTool(Tool):
     f1 = f2 = k_point = curr_ellipse = None
 
     def activate(self):
-        self.set_help_text("Click once, then click and drag to create an ellipse.")
+        self.set_help_text('Click once, then click and drag to create an ellipse.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -286,7 +286,7 @@ class EllipseTool(Tool):
 
 class MidpointTool(Tool):
     def activate(self):
-        self.set_help_text("Click a line to display its midpoint.")
+        self.set_help_text('Click a line to display its midpoint.')
 
     def left_click(self, event):
         '''Create a midpoint on the given line.'''
@@ -302,7 +302,7 @@ class MidsetTool(Tool):
     p1 = p2 = None
 
     def activate(self):
-        self.set_help_text("Click two points to display their midset.")
+        self.set_help_text('Click two points to display their midset.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -328,7 +328,7 @@ class PerpendicularTool(Tool):
     line = p = curr_perp = None
 
     def activate(self):
-        self.set_help_text("Click a line and drag to display a perpendicular.")
+        self.set_help_text('Click a line and drag to display a perpendicular.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -367,7 +367,7 @@ class ParallelTool(Tool):
     line = p = curr_parallel = None
 
     def activate(self):
-        self.set_help_text("Click a line and drag to display a parallel.")
+        self.set_help_text('Click a line and drag to display a parallel.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -407,7 +407,7 @@ class ParabolaTool(Tool):
     focus = directrix = curr_parabola = end_point = None
 
     def activate(self):
-        self.set_help_text("Click once, then click and drag to create a parabola.")
+        self.set_help_text('Click once, then click and drag to create a parabola.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -481,7 +481,7 @@ class HyperbolaTool(Tool):
     f1 = f2 = k_point = curr_hyperbola = None
 
     def activate(self):
-        self.set_help_text("Click once, then click and drag to create a hyperbola.")
+        self.set_help_text('Click once, then click and drag to create a hyperbola.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -543,9 +543,9 @@ class BisectTool(Tool):
 
     def activate(self):
         self.set_help_text(
-            "Click a point on one ray, then click the vertex of the " + \
-            "angle, then click a point on second ray to create an " + \
-            "angle bisector.")
+            'Click a point on one ray, then click the vertex of the ' + \
+            'angle, then click a point on second ray to create an ' + \
+            'angle bisector.')
 
     def deactivate(self):
         self.set_help_text('')
@@ -577,8 +577,8 @@ class MindistTool(Tool):
 
     def activate(self):
         self.set_help_text(
-            "Click points one at a time, then click 'Finish' to find " + \
-            "the location of minimum distance to those points.")
+            'Click points one at a time, then click 'Finish' to find ' + \
+            'the location of minimum distance to those points.')
 
         self.finish_button = c.create_rectangle(7,40, 80,62, fill='red', width=2, tags='Button')
         self.finish_text = c.create_text(10,40, text='FINISH', anchor=NW, fill='black', font=('Arial','16'), tags='Button')
