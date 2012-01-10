@@ -117,7 +117,7 @@ class PointTool(Tool):
         x, y = event.x, event.y
         items = self.items
 
-        if items['Point']:
+        if items and items['Point']:
             point_handle = items['Point'][0]
             point = graphics[point_handle]
             point.set_coord(x, y)
@@ -165,7 +165,7 @@ class LineTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y, self.end_point.handle, self.curr_line.handle)
 
-        if items['Point']:
+        if items and items['Point']:
             point_handle = items['Point'][0]
             self.curr_line.change_parent(1, graphics[point_handle])
             self.end_point.delete()
@@ -214,7 +214,7 @@ class CircleTool(Tool):
         # Get the items under the cursor.
         items = under_cursor(x, y, self.radius_point.handle, self.curr_circle.handle)
 
-        if items['Point']:
+        if items and items['Point']:
             point_handle = items['Point'][0]
             self.curr_circle.change_parent(1, graphics[point_handle])
             self.radius_point.delete()
@@ -275,7 +275,7 @@ class EllipseTool(Tool):
             x, y = event.x, event.y
             items = under_cursor(x, y, self.k_point.handle, self.curr_ellipse.handle)
 
-            if items['Point']:
+            if items and items['Point']:
                 point_handle = items['Point'][0]
                 self.curr_ellipse.change_parent(2, graphics[point_handle])
                 self.k_point.delete()
@@ -292,7 +292,7 @@ class MidpointTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if items['Line']:
+        if items and items['Line']:
             line_handle = items['Line'][0]
             mid_point = add_graphic(g.PointOnLine, graphics[line_handle], x, y, .5, locked=True)
 
@@ -311,7 +311,7 @@ class MidsetTool(Tool):
         """Create the midset of two points."""
         items = under_cursor(event.x, event.y)
 
-        if items['Point']:
+        if items and items['Point']:
             point_handle = items['Point'][0]
 
             if not self.p1:
@@ -338,7 +338,7 @@ class PerpendicularTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if items['Line']:
+        if items and items['Line']:
             line_handle = items['Line'][0]
             line = self.line = graphics[line_handle]
             self.p = add_graphic(g.Point, x, y)
@@ -354,7 +354,7 @@ class PerpendicularTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y, self.p.handle)
 
-        if items['Point']:
+        if items and items['Point']:
             point_handle = items['Point'][0]
             self.curr_perp.change_parent(1, graphics[point_handle])
             self.p.delete()
@@ -377,7 +377,7 @@ class ParallelTool(Tool):
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
-        if items['Line']:
+        if items and items['Line']:
             line_handle = items['Line'][0]
             line = self.line = graphics[line_handle]
             self.p = add_graphic(g.Point, x, y)
@@ -394,7 +394,7 @@ class ParallelTool(Tool):
             x, y = event.x, event.y
             items = under_cursor(x, y, self.p.handle)
 
-            if items['Point']:
+            if items and items['Point']:
                 point_handle = items['Point'][0]
                 self.curr_parallel.change_parent(1, graphics[point_handle])
                 self.p.delete()
@@ -468,7 +468,7 @@ class ParabolaTool(Tool):
             else:
                 items = under_cursor(x, y, self.directrix.handle)
 
-            if items['Point']:
+            if items and items['Point']:
                 point_handle = items['Point'][0]
                 self.curr_parabola.parents[1].change_parent(1, graphics[point_handle])
                 self.end_point.delete()
@@ -529,7 +529,7 @@ class HyperbolaTool(Tool):
             x, y = event.x, event.y
             items = under_cursor(x, y, self.k_point.handle)
 
-            if items['Point']:
+            if items and items['Point']:
                 point_handle = items['Point'][0]
                 self.curr_hyperbola.change_parent(2, graphics[point_handle])
                 self.k_point.delete()
@@ -554,7 +554,7 @@ class BisectTool(Tool):
         """Pick points that form an angle."""
         items = under_cursor(event.x, event.y)
 
-        if items['Point']:
+        if items and items['Point']:
             point_handle = items['Point'][0]
 
             if not self.r1:
@@ -597,7 +597,7 @@ class MindistTool(Tool):
         """Select points to find the minimum distance from."""
         items = under_cursor(event.x, event.y)
 
-        if items['Point']:
+        if items and items['Point']:
             point_handle = items['Point'][0]
             self.loci.append(graphics[point_handle])
         elif items['Button']:
