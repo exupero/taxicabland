@@ -77,7 +77,20 @@ def notifies(method):
     return wrapper
 
 
+class GraphicType(type):
+    def __new__(cls, name, bases, attrs):
+        if '__init__' in attrs:
+            attrs['__init__'] = updates(attrs['__init__'])
+
+        if 'update' in attrs:
+            attrs['update'] = notifies(attrs['update'])
+
+        return type.__new__(cls, name, bases, attrs)
+
+
 class Graphic(object):
+    __metaclass__ = GraphicType
+
     ops = (
         'notify',
         'change_parent',
@@ -112,7 +125,6 @@ class Point(Graphic):
     unselected_specs = {
         'outline': ''}
 
-    @updates
     def __init__(self, x, y):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -123,7 +135,6 @@ class Point(Graphic):
     def set_coord(self, x, y):
         self.coord = x, y
 
-    @notifies
     def update(self):
         x, y = self.coord
         size = self.size
@@ -143,7 +154,6 @@ class PointOnLine(Graphic):
         'width': 2,
         'tags': 'Point'}
 
-    @updates
     def __init__(self, line, x, y, position=None, locked=False):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -168,7 +178,6 @@ class PointOnLine(Graphic):
     def set_coord(self, x,y):
         self.coord = x,y
 
-    @notifies
     def update(self):
         ax, ay = self.parents[0].parents[0].coord
         bx, by = self.parents[0].parents[1].coord
@@ -208,7 +217,6 @@ class PointOfIntersection(Graphic):
         'width': 2,
         'tags': 'Point'}
 
-    @updates
     def __init__(self, (x, y), object1, object2):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -216,7 +224,6 @@ class PointOfIntersection(Graphic):
         self.become_child()
         self.coord = x, y
 
-    @notifies
     def update(self):
         a, b = self.parents
         size = self.size
@@ -237,7 +244,6 @@ class Line(Graphic):
     unselected_specs = {
         'fill': 'black'}
 
-    @updates
     def __init__(self, a, b):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -257,7 +263,6 @@ class Line(Graphic):
 
         return tuple(quality)
 
-    @notifies
     def update(self):
         ax, ay = self.parents[0].coord
         bx, by = self.parents[1].coord
@@ -275,7 +280,6 @@ class Circle(Graphic):
     unselected_specs = {
         'fill': 'black'}
 
-    @updates
     def __init__(self, center_point, radius_point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -290,7 +294,6 @@ class Circle(Graphic):
         quality = dist(center,point) - dist(center,radius)
         return abs(quality)
 
-    @notifies
     def update(self):
         cx, cy = self.parents[0].coord
         radius = self.radius = dist(self.parents[0].coord, self.parents[1].coord)
@@ -319,7 +322,6 @@ class Ellipse(Graphic):
         'width': 1,
         'tags': 'Ellipse'}
 
-    @updates
     def __init__(self, focus1, focus2, k_point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.tielines = c.create_line(0, 0, 0, 0, **self.tieline_specs)
@@ -336,7 +338,6 @@ class Ellipse(Graphic):
         quality = dist(focus1.coord, point) + dist(focus2.coord, point) - k
         return abs(quality)
 
-    @notifies
     def update(self):
         f1x, f1y = f1 = self.parents[0].coord
         f2x, f2y = f2 = self.parents[1].coord
@@ -390,7 +391,6 @@ class Midset(Graphic):
         'width': 2,
         'tags': 'Midset'}
 
-    @updates
     def __init__(self, a, b):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
@@ -403,7 +403,6 @@ class Midset(Graphic):
         c.lower(self.block2)
         c.lower(1) # the grid
 
-    @notifies
     def update(self):
         p1, p2 = self.parents
         midp = (p1.coord[0] + p2.coord[0]) * .5, (p1.coord[1] + p2.coord[1]) * .5
@@ -511,7 +510,6 @@ class Perpendicular(Graphic):
         'width': 2,
         'tags': 'Midset'}
 
-    @updates
     def __init__(self, line, point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
@@ -524,7 +522,6 @@ class Perpendicular(Graphic):
         c.lower(self.block2)
         c.lower(1) # the grid
 
-    @notifies
     def update(self):
         line, p = self.parents
         px, py = p.coord
@@ -652,7 +649,6 @@ class Parallel(Graphic):
         'width': 2,
         'tags': 'Line'}
 
-    @updates
     def __init__(self, line, point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -660,7 +656,6 @@ class Parallel(Graphic):
         self.become_child()
         self.lower()
 
-    @notifies
     def update(self):
         line, point = self.parents
         l1, l2 = line.parents
@@ -690,7 +685,6 @@ class Parabola(Graphic):
         'width': 2,
         'tags': 'Parabola'}
 
-    @updates
     def __init__(self, focus, directrix):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -698,7 +692,6 @@ class Parabola(Graphic):
         self.become_child()
         self.lower()
 
-    @notifies
     def update(self):
         focus, directrix = self.parents
         fx, fy = focus.coord
@@ -782,7 +775,6 @@ class Hyperbola(Graphic):
         'width': 1,
         'tags': 'Hyperbola'}
 
-    @updates
     def __init__(self, f1, f2, k_point):
         self.handle = c.create_oval(0, 0, 0, 0)
         self.mid_handles = [
@@ -806,7 +798,6 @@ class Hyperbola(Graphic):
         c.lower(self.tielines)
         c.lower(1) # the grid
 
-    @notifies
     def update(self):
         focus1, focus2, k_point = self.parents
         k = dist(focus1.coord, k_point.coord) - dist(focus2.coord, k_point.coord)
@@ -916,7 +907,6 @@ class Bisect(Graphic):
         'width': 2,
         'tags': 'Bisect'}
 
-    @updates
     def __init__(self, r1, v, r2):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.operations = Operations(self)
@@ -924,7 +914,6 @@ class Bisect(Graphic):
         self.become_child()
         self.lower()
 
-    @notifies
     def update(self):
         r1, v, r2 = self.parents
         r1, v, r2 = r1.coord, v.coord, r2.coord
@@ -1026,7 +1015,6 @@ class Mindist(Graphic):
         'outline': '',
         'tags': 'Mindist'}
 
-    @updates
     def __init__(self, points):
         color = current_color.next()
 
@@ -1046,7 +1034,6 @@ class Mindist(Graphic):
 
         self.lower()
 
-    @notifies
     def update(self):
         xs = [parent.coord[0] for parent in self.parents]
         ys = [parent.coord[1] for parent in self.parents]
