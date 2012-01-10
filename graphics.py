@@ -1,3 +1,6 @@
+from itertools import cycle
+
+
 c = None
 
 
@@ -45,11 +48,9 @@ def dist(a,b):
             vdist = dist((ax,y),(ax,ay))
 
             return min(hdist,vdist)
-
         elif not cx - dx:
             # The line is vertical, return the horizontal distance.
             return dist((cx,ay),(ax,ay))
-
         elif not cy - dy:
             # The line is horizontal, return the vertical distance.
             return dist((ax,cy),(ax,ay))
@@ -57,7 +58,6 @@ def dist(a,b):
     # If both a and b are tuples (coordinate pairs)...
     if type(a) == type(()) and type(b) == type(()):
         return point_point()
-
     # If a is a line and b is coordinate or vice versa, pass the line to the point_line distance
     # function second.
     elif isinstance(a, Line) and isinstance(b, tuple):
@@ -83,15 +83,13 @@ def find_intersection((a1,b1),(a2,b2)):
             ix = float(int2 - int1) / (m1 - m2)
             iy = m1 * ix + int1
         elif m1 == m2:
-            return None
-
+            return
     elif a1x == b1x:
         m2 = float(a2y - b2y) / (a2x - b2x)
         int2 = a2y - m2 * a2x
 
         ix = a1x
         iy = m2 * ix + int2
-
     elif a2x == b2x:
         m1 = float(a1y - b1y) / (a1x - b1x)
         int1 = a1y - m1 * a1x
@@ -106,49 +104,25 @@ def find_intersect(a,b, depth, *bounds):
     if depth > 10 or abs(bounds[0] - bounds[2]) < 5 or abs(bounds[1] - bounds[3]) < 5:
         x = (x1 + x2) * .5
         y = (y1 + y2) * .5
-        return x,y
+        return x, y
 
     box = c.find_overlapping(*bounds)
 
-    q1bounds = bounds[0], bounds[1], bounds[2]*.5, bounds[3]*.5
-    q2bounds = bounds[2]*.5, bounds[1], bounds[2], bounds[3]*.5
-    q3bounds = bounds[0], bounds[3]*.5, bounds[2]*.5, bounds[3]
-    q4bounds = bounds[2]*.5, bounds[3]*.5, bounds[2], bounds[3]
+    q1bounds = bounds[0], bounds[1], bounds[2] * .5, bounds[3] * .5
+    q2bounds = bounds[2] * .5, bounds[1], bounds[2], bounds[3] * .5
+    q3bounds = bounds[0], bounds[3] * .5, bounds[2] * .5, bounds[3]
+    q4bounds = bounds[2] * .5, bounds[3] * .5, bounds[2], bounds[3]
 
-    print box
-
-    return None
-
-    if a in box and b in box:
-        result1 = find_intersect(a,b, depth+1, *q1bounds) # First quadrant
-        result2 = find_intersect(a,b, depth+1, *q2bounds) # Second quadrant
-        result3 = find_intersect(a,b, depth+1, *q3bounds) # Third quadrant
-        result4 = find_intersect(a,b, depth+1, *q4bounds) # Fourth quadrant
-
-        if result1: return result1
-        if result2: return result2
-        if result3: return result3
-        if result4: return result4
-
-    return None
+    return
 
 
-def curr_color():
-    colors = (
-        '#00cc00', # Green
-        '#3300ff', # Blue
-        '#ff9900', # Orange
-        '#ff33cc', # Pink
-        '#00ffff', # Cyan
-        )
-
-    k = -1
-    while True:
-        k += 1
-        k %= 5
-        yield colors[k]
-
-current_color = curr_color()
+current_color = cycle([
+    '#00cc00', # Green
+    '#3300ff', # Blue
+    '#ff9900', # Orange
+    '#ff33cc', # Pink
+    '#00ffff', # Cyan
+])
 
 
 class Operations:
