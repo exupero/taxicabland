@@ -102,15 +102,11 @@ class PointTool(Tool):
         x, y = event.x, event.y
         items = self.items = under_cursor(x, y)
 
-        if not items:
-            add_graphic(g.Point, x, y)
-        elif items.get('Point'):
-            pass
-        elif items.get('Line'):
+        if items.get('Line'):
             line_handle = items['Line'][0]
             line = graphics[line_handle]
             add_graphic(g.PointOnLine, line, x, y)
-        else:
+        elif not items.get('Point'):
             add_graphic(g.Point, x, y)
 
     def left_drag(self, event):
