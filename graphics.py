@@ -4,13 +4,20 @@ c = None
 global current_color
 
 
-ops = ('notify','change_parent','add_child','remove_child','become_child',
-       'lower','select','deselect','delete')
+ops = (
+    'notify',
+    'change_parent',
+    'add_child',
+    'remove_child',
+    'become_child',
+    'lower',
+    'select',
+    'deselect',
+    'delete',
+)
 
 
 def dist(a,b):
-    def class_name(item): return item.__class__.__name__
-
     def point_point():
         ax, ay = a
         bx, by = b
@@ -53,9 +60,9 @@ def dist(a,b):
 
     # If a is a line and b is coordinate or vice versa, pass the line to the point_line distance
     # function second.
-    elif class_name(a) == 'Line' and type(b) == type(()):
+    elif isinstance(a, Line) and isinstance(b, tuple):
         return point_line(b,a)
-    elif type(a) == type(()) and class_name(b) == 'Line':
+    elif isinstance(a, tuple) and isinstance(b, Line):
         return point_line(a,b)
 
 
