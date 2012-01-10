@@ -1,9 +1,12 @@
 c = None
 
+
 global current_color
+
 
 ops = ('notify','change_parent','add_child','remove_child','become_child',
 	'lower','select','deselect','delete')
+
 
 def dist(a,b):
 	def class_name(item): return item.__class__.__name__
@@ -55,6 +58,7 @@ def dist(a,b):
 	elif type(a) == type(()) and class_name(b) == 'Line':
 		return point_line(a,b)
 
+
 def find_intersection((a1,b1),(a2,b2)):
 	a1x,a1y = a1
 	b1x,b1y = b1
@@ -90,6 +94,7 @@ def find_intersection((a1,b1),(a2,b2)):
 
 	return ix,iy
 	
+
 def find_intersect(a,b, depth, *bounds):
 	if depth > 10 or abs(bounds[0] - bounds[2]) < 5 or abs(bounds[1] - bounds[3]) < 5:
 		x = (x1 + x2) * .5
@@ -120,6 +125,7 @@ def find_intersect(a,b, depth, *bounds):
 
 	return None
 
+
 def curr_color():
 	colors = (
 		'#00cc00', # Green
@@ -136,6 +142,7 @@ def curr_color():
 		yield colors[k]
 
 current_color = curr_color()
+
 	
 class Operations:
 	def __init__(self, master):
@@ -209,6 +216,7 @@ class Operations:
 		if hasattr(master, 'delete_extras'):
 			getattr(master, 'delete_extras')()
 	
+
 class Point:
 	size = 5
 	
@@ -382,6 +390,7 @@ class PointOfIntersection:
 				
 		self.notify()
 		
+
 class Line:
 	new_specs = {
 		'width': 2,
@@ -480,6 +489,7 @@ class Circle:
 			cx - radius, cy)
 				
 		self.notify()		
+
 
 class Ellipse:
 	new_specs = {
@@ -1292,6 +1302,7 @@ class Bisect:
 		
 		self.notify()
 		
+
 class Mindist:
 	new_area = {
 		'stipple': 'gray50',
@@ -1376,5 +1387,3 @@ class Mindist:
 			c.itemconfigure(parent.handle, fill='red')
 			
 		self.__operations.delete()
-		
-		

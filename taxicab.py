@@ -4,6 +4,7 @@ import Image, ImageDraw
 import graphics
 import tools
 
+
 class Tool:
 	__button_attrs = {
 		'borderwidth': 1,
@@ -115,25 +116,6 @@ class TaxicabGeometry:
 	
 		c = self.c
 	
-		# The following code was originally used to generate the gif
-		# which is loaded as the image background. It is not 
-		# necessary to re-create the image every time the program 
-		# runs.
-		# --------------------------------------------------------------------------
-		
-		# grid = Image.new("RGB", (2000,1000), 'white')
-		# draw = ImageDraw.Draw(grid)
-		
-		# Draw the gridlines in the file.
-		# grid_color = 200,200,200
-		# for y in range(0,1000,30):
-			# draw.line([0,y,2000,y], grid_color)
-		
-		# for x in range(0,2000,30):
-			# draw.line([x,0,x,2000], grid_color)
-			
-		# grid.save('grid.gif')
-			
 		try:
 			self.grid_image = tk.PhotoImage(file='grid.gif')
 		except:
@@ -162,22 +144,11 @@ class TaxicabGeometry:
 		filename = tkFileDialog.asksaveasfilename(
 			defaultextension='.jpg',
 			filetypes=(
-				# ('JPEG','.jpg'),
-				# ('PNG','.png'),
 				('Postscript','.ps'),))
-				# ('EPS','.eps')))
 		
 		if filename:
 			self.c.postscript(file=filename)
 			
-			# image1 = Image.new("RGB", (self.cwidth, self.cheight), 'white')
-			# draw = ImageDraw.Draw(image1)
-			
-			# try:
-				# Image.open('render.ps').save(filename)
-			# except:
-				# print "Cannot convert render.ps."
-				
 	def help_button(self):
 		help = tk.Tk()
 		help.title('Taxicab Geometry v1 help')

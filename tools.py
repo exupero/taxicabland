@@ -2,8 +2,10 @@ from Tkinter import NW
 
 import graphics as g
 
+
 graphics = {}
 c = None
+
 
 def add_graphic(new_object, *args, **kwargs):
 	"""Adds a graphic to the display."""
@@ -17,6 +19,7 @@ def add_graphic(new_object, *args, **kwargs):
 	# Return the new instance.
 	return new_object
 	
+
 def under_cursor(x,y, *discount):
 	"""Retrieves the objects under the cursor (within a certain
 	margin). Returns a dictionary in which the keys are the available
@@ -144,7 +147,6 @@ class PointTool(Tool):
 		else:
 			no_items()
 
-			
 	def left_drag(self, event):
 		"""Moves a point."""
 		
@@ -263,6 +265,7 @@ class LineTool(Tool):
 		# Reset the current line.
 		self.end_point = self.curr_line = None		
 	
+
 class CircleTool(Tool):
 	radius_point = curr_circle = None
 	
@@ -354,6 +357,7 @@ class CircleTool(Tool):
 		# Reset the tool.
 		self.radius_point = self.curr_circle = None
 			
+
 class EllipseTool(Tool):
 	f1 = f2 = k_point = curr_ellipse = None
 	
@@ -498,6 +502,7 @@ class MidpointTool(Tool):
 		else:
 			no_items()
 		
+
 class MidsetTool(Tool):
 	p1 = p2 = None
 
@@ -854,6 +859,7 @@ class ParabolaTool(Tool):
 			# Reset the tool.
 			self.focus = self.directrix = self.curr_parabola = self.end_point = None
 	
+
 class HyperbolaTool(Tool):
 	f1 = f2 = k_point = curr_hyperbola = None
 	
@@ -963,6 +969,7 @@ class HyperbolaTool(Tool):
 			# Reset the tool.
 			self.f1 = self.f2 = self.k_point = self.curr_hyperbola = None
 			
+
 class BisectTool(Tool):
 	r1 = v = r2 = None
 	
