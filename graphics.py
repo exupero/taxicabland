@@ -417,7 +417,6 @@ class Midset(Graphic):
         def find_closest(f1, f2):
             f1x,f1y = f1
             f2x,f2y = f2
-            fdist = dist(f1,f2)
 
             # The circle points k from f1.
             f1c = ((f1x + k, f1y), (f1x, f1y + k), (f1x - k, f1y), (f1x, f1y - k))
@@ -560,7 +559,6 @@ class Perpendicular(Graphic):
             def find_closest(f1, f2):
                 f1x, f1y = f1
                 f2x, f2y = f2
-                fdist = dist(f1, f2)
 
                 # The circle points k from f1.
                 f1c = ((f1x + k, f1y), (f1x, f1y + k), (f1x - k, f1y), (f1x, f1y - k))
@@ -662,17 +660,13 @@ class Parallel(Graphic):
         l1, l2 = l1.coord, l2.coord
         px, py = point.coord
 
-        # If the line has a non-infinite slope...
-        if l1[0] - l2[0]:
+        if l1[0] - l2[0]: # non-infinite slope
             slope = float(l1[1] - l2[1]) / (l1[0] - l2[0])
             intercept = py - slope * px
 
-            # The two end points of the line.
             p1 = 0, intercept
             p2 = 2000, slope * 2000 + intercept
-
-        # If the line is vertical....
-        elif not l1[0] - l2[0]:
+        elif not l1[0] - l2[0]: # vertical line
             p1 = px, 0
             p2 = px, 2000
 
@@ -793,8 +787,10 @@ class Hyperbola(Graphic):
         self.become_child()
 
         c.lower(self.handle)
-        [c.lower(handle) for handle in self.mid_handles]
-        [c.lower(handle) for handle in self.arm_handles]
+
+        for handle in self.mid_handles + self.arm_handles:
+            c.lower(handle)
+
         c.lower(self.tielines)
         c.lower(1) # the grid
 
@@ -858,7 +854,6 @@ class Hyperbola(Graphic):
                     cy = 2000
                 elif by == ay:
                     cy = ay
-
             elif len(free_points) == 2:
                 b1x, b1y = free_points[0]
                 b2x, b2y = free_points[1]
@@ -882,6 +877,7 @@ class Hyperbola(Graphic):
         def make_hyperbola(f1, f2, number):
             # Make the middle segment.
             np = find_closest(f1.coord, f2.coord)
+
             if len(np) == 2:
                 np1, np2 = np
                 np1x, np1y = np1
@@ -949,9 +945,7 @@ class Bisect(Graphic):
 
         def arc_angle(angle):
             angle %= 360
-
-            # An arbitrary radius.
-            r = 2000
+            r = 2000 # arbitrary radius
 
             def acute_angle(angle):
                 # angle / 360 = arc length / circumference (circumference is 8r)
@@ -964,30 +958,24 @@ class Bisect(Graphic):
 
             if angle > 0 and angle < 90:
                 xshort = acute_angle(angle)
-                x = r - xshort
-                y = xshort
+                return r - xshort, xshort
             elif angle > 90 and angle < 180:
                 xshort = acute_angle(180 - angle)
-                x = -r + xshort
-                y = xshort
+                return -r + xshort, xshort
             elif angle > 180 and angle < 270:
                 xshort = acute_angle(angle - 180)
-                x = -r + xshort
-                y = -xshort
+                return -r + xshort, -xshort
             elif angle > 270 and angle < 360:
                 xshort = acute_angle(360 - angle)
-                x = r - xshort
-                y = -xshort
+                return r - xshort, -xshort
             elif angle == 0:
-                x, y = r, 0
+                return r, 0
             elif angle == 90:
-                x, y = 0, r
+                return 0, r
             elif angle == 180:
-                x, y = -r, 0
+                return -r, 0
             elif angle == 270:
-                x, y = 0, -r
-
-            return x, y
+                return 0, -r
 
         angle1 = angle(v, r1)
         angle2 = angle(v, r2)
@@ -1056,15 +1044,12 @@ class Mindist(Graphic):
                 ymid[0] -= 2
                 ymid[1] += 2
 
-            c.coords(self.handle,
-                xmid[0],ymid[0], xmid[1],ymid[1])
+            c.coords(self.handle, xmid[0], ymid[0], xmid[1], ymid[1])
         elif len(self.parents) % 2:
             xmid = xs[xmid]
             ymid = ys[ymid]
-
             size = 3
-            c.coords(self.handle,
-                xmid - size, ymid - size, xmid + size, ymid + size)
+            c.coords(self.handle, xmid - size, ymid - size, xmid + size, ymid + size)
 
     def delete(self):
         for parent in self.parents:
