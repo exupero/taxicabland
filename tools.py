@@ -586,13 +586,8 @@ class MindistTool(Tool):
     def deactivate(self):
         self.set_help_text('')
         self.loci = []
-
-    def deactivate(self):
         c.delete(self.finish_button)
         c.delete(self.finish_text)
-
-        # Reset the help text.
-        c.itemconfigure(self.help_text_handle, text='')
 
     def left_click(self, event):
         '''Select points to find the minimum distance from.'''
