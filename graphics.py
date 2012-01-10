@@ -69,6 +69,14 @@ def updates(method):
     return wrapper
 
 
+def notifies(method):
+    @wraps(method)
+    def wrapper(graphic, *args, **kwargs):
+        method(graphic, *args, **kwargs)
+        graphic.notify()
+    return wrapper
+
+
 class Graphic(object):
     ops = (
         'notify',
@@ -115,6 +123,7 @@ class Point(Graphic):
     def set_coord(self, x, y):
         self.coord = x, y
 
+    @notifies
     def update(self):
         x, y = self.coord
         size = self.size
@@ -123,8 +132,6 @@ class Point(Graphic):
             x - size, y - size,
             x + size, y + size)
         c.lift(self.handle)
-
-        self.notify()
 
 
 class PointOnLine(Graphic):
@@ -161,6 +168,7 @@ class PointOnLine(Graphic):
     def set_coord(self, x,y):
         self.coord = x,y
 
+    @notifies
     def update(self):
         ax, ay = self.parents[0].parents[0].coord
         bx, by = self.parents[0].parents[1].coord
@@ -189,7 +197,6 @@ class PointOnLine(Graphic):
         c.coords(self.handle,
             x - size, y - size,
             x + size, y + size)
-        self.notify()
 
 
 class PointOfIntersection(Graphic):
@@ -209,6 +216,7 @@ class PointOfIntersection(Graphic):
         self.become_child()
         self.coord = x, y
 
+    @notifies
     def update(self):
         a, b = self.parents
         size = self.size
@@ -216,7 +224,6 @@ class PointOfIntersection(Graphic):
 
         c.coords(self.handle, x - size, y - size, x + size, y + size)
         c.lift(self.handle)
-        self.notify()
 
 
 class Line(Graphic):
@@ -250,11 +257,11 @@ class Line(Graphic):
 
         return tuple(quality)
 
+    @notifies
     def update(self):
         ax, ay = self.parents[0].coord
         bx, by = self.parents[1].coord
         c.coords(self.handle, ax, ay, bx, by)
-        self.notify()
 
 
 class Circle(Graphic):
@@ -283,6 +290,7 @@ class Circle(Graphic):
         quality = dist(center,point) - dist(center,radius)
         return abs(quality)
 
+    @notifies
     def update(self):
         cx, cy = self.parents[0].coord
         radius = self.radius = dist(self.parents[0].coord, self.parents[1].coord)
@@ -293,7 +301,6 @@ class Circle(Graphic):
             cx + radius, cy,
             cx, cy + radius,
             cx - radius, cy)
-        self.notify()
 
 
 class Ellipse(Graphic):
@@ -329,6 +336,7 @@ class Ellipse(Graphic):
         quality = dist(focus1.coord, point) + dist(focus2.coord, point) - k
         return abs(quality)
 
+    @notifies
     def update(self):
         f1x, f1y = f1 = self.parents[0].coord
         f2x, f2y = f2 = self.parents[1].coord
@@ -366,8 +374,6 @@ class Ellipse(Graphic):
         c.coords(self.tielines,
             f1x, f1y, kx, ky, f2x, f2y)
 
-        self.notify()
-
     def delete_extras(self):
         c.delete(self.tielines)
 
@@ -397,6 +403,7 @@ class Midset(Graphic):
         c.lower(self.block2)
         c.lower(1) # the grid
 
+    @notifies
     def update(self):
         p1, p2 = self.parents
         midp = (p1.coord[0] + p2.coord[0]) * .5, (p1.coord[1] + p2.coord[1]) * .5
@@ -486,7 +493,6 @@ class Midset(Graphic):
                 c.coords(self.block2, np2x, np2y, dx, dy)
 
         make_midset(p1,p2)
-        self.notify()
 
     def delete_extras(self):
         c.delete(self.block1)
@@ -518,6 +524,7 @@ class Perpendicular(Graphic):
         c.lower(self.block2)
         c.lower(1) # the grid
 
+    @notifies
     def update(self):
         line, p = self.parents
         px, py = p.coord
@@ -634,8 +641,6 @@ class Perpendicular(Graphic):
             # The midset.
             make_midset(p1, p2)
 
-        self.notify()
-
     def delete_extras(self):
         c.delete(self.block1)
         c.delete(self.block2)
@@ -655,6 +660,7 @@ class Parallel(Graphic):
         self.become_child()
         self.lower()
 
+    @notifies
     def update(self):
         line, point = self.parents
         l1, l2 = line.parents
@@ -676,7 +682,6 @@ class Parallel(Graphic):
             p2 = px, 2000
 
         c.coords(self.handle, p1[0], p1[1], p2[0], p2[1])
-        self.notify()
 
 
 class Parabola(Graphic):
@@ -693,6 +698,7 @@ class Parabola(Graphic):
         self.become_child()
         self.lower()
 
+    @notifies
     def update(self):
         focus, directrix = self.parents
         fx, fy = focus.coord
@@ -759,8 +765,6 @@ class Parabola(Graphic):
         if int1 and int2 and far1 and far2:
             c.coords(self.handle, far1x, far1y, t1x, t1y, mx, my, t2x, t2y, far2x, far2y)
 
-        self.notify()
-
 
 class Hyperbola(Graphic):
     mid_specs = {
@@ -802,6 +806,7 @@ class Hyperbola(Graphic):
         c.lower(self.tielines)
         c.lower(1) # the grid
 
+    @notifies
     def update(self):
         focus1, focus2, k_point = self.parents
         k = dist(focus1.coord, k_point.coord) - dist(focus2.coord, k_point.coord)
@@ -898,7 +903,6 @@ class Hyperbola(Graphic):
 
         make_hyperbola(focus1, focus2, 0)
         make_hyperbola(focus2, focus1, 1)
-        self.notify()
 
     def delete_extras(self):
         c.delete(*self.mid_handles)
@@ -920,6 +924,7 @@ class Bisect(Graphic):
         self.become_child()
         self.lower()
 
+    @notifies
     def update(self):
         r1, v, r2 = self.parents
         r1, v, r2 = r1.coord, v.coord, r2.coord
@@ -1009,7 +1014,6 @@ class Bisect(Graphic):
         y += sy
 
         c.coords(self.handle, sx, sy, x,y)
-        self.notify()
 
 
 class Mindist(Graphic):
@@ -1042,6 +1046,7 @@ class Mindist(Graphic):
 
         self.lower()
 
+    @notifies
     def update(self):
         xs = [parent.coord[0] for parent in self.parents]
         ys = [parent.coord[1] for parent in self.parents]
@@ -1073,8 +1078,6 @@ class Mindist(Graphic):
             size = 3
             c.coords(self.handle,
                 xmid - size, ymid - size, xmid + size, ymid + size)
-
-        self.notify()
 
     def delete(self):
         for parent in self.parents:
