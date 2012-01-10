@@ -8,16 +8,17 @@ c = None
 
 
 def add_graphic(new_object, *args, **kwargs):
-    """Adds a graphic to the display."""
     new_object = new_object(*args, **kwargs)
     graphics[new_object.handle] = new_object
     return new_object
 
 
 def under_cursor(x,y, *discount):
-    """Retrieves the objects under the cursor (within a certain
-    margin). Returns a dictionary in which the keys are the available
-    labels and the values are lists of which handles have that label."""
+    '''
+    Retrieves the objects under the cursor (within a certain margin).
+    Returns a dictionary in which the keys are the available labels
+    and the values are lists of which handles have that label.
+    '''
     size = 2
     over_items = c.find_overlapping(
         x - size, y - size,
@@ -84,7 +85,7 @@ class Tool(object):
         pass
 
     def right_click(self, event):
-        """Removes an item."""
+        '''Removes an item.'''
         over_item = c.find_withtag('current')
 
         if over_item and over_item[0] != 1: # not the grid
@@ -113,7 +114,7 @@ class PointTool(Tool):
             add_graphic(g.Point, x, y)
 
     def left_drag(self, event):
-        """Moves a point."""
+        '''Moves a point.'''
         x, y = event.x, event.y
         items = self.items
 
@@ -137,7 +138,7 @@ class LineTool(Tool):
         self.end_point = self.curr_line = None
 
     def left_click(self, event):
-        """Creates a new line."""
+        '''Creates a new line.'''
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
@@ -156,12 +157,12 @@ class LineTool(Tool):
             self.curr_line = add_graphic(g.Line, start_point, end_point)
 
     def left_drag(self, event):
-        """Move the end of the line."""
+        '''Move the end of the line.'''
         if self.end_point:
             self.end_point.set_coord(event.x, event.y)
 
     def left_release(self, event):
-        """Finish creating the line."""
+        '''Finish creating the line.'''
         x, y = event.x, event.y
         items = under_cursor(x, y, self.end_point.handle, self.curr_line.handle)
 
@@ -184,7 +185,7 @@ class CircleTool(Tool):
         self.radius_point = self.curr_circle = None
 
     def left_click(self, event):
-        """Create the center and radius points of the circle."""
+        '''Create the center and radius points of the circle.'''
         x, y = event.x, event.y
         items = under_cursor(x,y)
 
@@ -203,12 +204,12 @@ class CircleTool(Tool):
             self.curr_circle = add_graphic(g.Circle, center_point, radius_point)
 
     def left_drag(self, event):
-        """Move the circle's radius control point."""
+        '''Move the circle's radius control point.'''
         if self.radius_point:
             self.radius_point.set_coord(event.x, event.y)
 
     def left_release(self, event):
-        """Finish creating the circle."""
+        '''Finish creating the circle.'''
         x, y = event.x, event.y
 
         # Get the items under the cursor.
@@ -233,7 +234,7 @@ class EllipseTool(Tool):
         self.f1 = self.f2 = self.k_point = self.curr_ellipse = None
 
     def left_click(self, event):
-        """Create the foci and k_point of the ellipse."""
+        '''Create the foci and k_point of the ellipse.'''
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
@@ -265,12 +266,12 @@ class EllipseTool(Tool):
                 self.curr_ellipse = add_graphic(g.Ellipse, self.f1, f2, k_point)
 
     def left_drag(self, event):
-        """Move the k_point."""
+        '''Move the k_point.'''
         if self.k_point:
             self.k_point.set_coord(event.x, event.y)
 
     def left_release(self, event):
-        """Finish the ellipse."""
+        '''Finish the ellipse.'''
         if self.k_point:
             x, y = event.x, event.y
             items = under_cursor(x, y, self.k_point.handle, self.curr_ellipse.handle)
@@ -288,7 +289,7 @@ class MidpointTool(Tool):
         self.set_help_text("Click a line to display its midpoint.")
 
     def left_click(self, event):
-        """Create a midpoint on the given line."""
+        '''Create a midpoint on the given line.'''
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
@@ -308,7 +309,7 @@ class MidsetTool(Tool):
         self.p1 = self.p2 = None
 
     def left_click(self, event):
-        """Create the midset of two points."""
+        '''Create the midset of two points.'''
         items = under_cursor(event.x, event.y)
 
         if items and items['Point']:
@@ -334,7 +335,7 @@ class PerpendicularTool(Tool):
         self.line = self.p = self.curr_perp = None
 
     def left_click(self, event):
-        """Select the line and create the point of a perpendicular."""
+        '''Select the line and create the point of a perpendicular.'''
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
@@ -345,12 +346,12 @@ class PerpendicularTool(Tool):
             self.curr_perp = add_graphic(g.Perpendicular, line, self.p)
 
     def left_drag(self, event):
-        """Move the point through which the perpendicular passes."""
+        '''Move the point through which the perpendicular passes.'''
         if self.p:
             self.p.set_coord(event.x, event.y)
 
     def left_release(self, event):
-        """Finish creating the perpendicular."""
+        '''Finish creating the perpendicular.'''
         x, y = event.x, event.y
         items = under_cursor(x, y, self.p.handle)
 
@@ -373,7 +374,7 @@ class ParallelTool(Tool):
         self.line = self.p = self.curr_parallel = None
 
     def left_click(self, event):
-        """Select the line and create the point of a parallel."""
+        '''Select the line and create the point of a parallel.'''
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
@@ -384,12 +385,12 @@ class ParallelTool(Tool):
             self.curr_parallel = add_graphic(g.Parallel, line, self.p)
 
     def left_drag(self, event):
-        """Move the point through which the parallel passes."""
+        '''Move the point through which the parallel passes.'''
         if self.p:
             self.p.set_coord(event.x, event.y)
 
     def left_release(self, event):
-        """Finish creating the parallel."""
+        '''Finish creating the parallel.'''
         if self.p:
             x, y = event.x, event.y
             items = under_cursor(x, y, self.p.handle)
@@ -413,7 +414,7 @@ class ParabolaTool(Tool):
         self.focus = self.directrix = self.curr_parabola = self.end_point = None
 
     def left_click(self, event):
-        """Make a new parabola."""
+        '''Make a new parabola.'''
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
@@ -454,12 +455,12 @@ class ParabolaTool(Tool):
                 self.curr_parabola = add_graphic(g.Parabola, self.focus, self.directrix)
 
     def left_drag(self, event):
-        """Move the end point of the directrix."""
+        '''Move the end point of the directrix.'''
         if self.end_point:
             self.end_point.set_coord(event.x, event.y)
 
     def left_release(self, event):
-        """Finish the parabola."""
+        '''Finish the parabola.'''
         if self.focus and self.directrix:
             x, y = event.x, event.y
 
@@ -487,7 +488,7 @@ class HyperbolaTool(Tool):
         self.f1 = self.f2 = self.k_point = self.curr_hyperbola = None
 
     def left_click(self, event):
-        """Create a hyperbola."""
+        '''Create a hyperbola.'''
         x, y = event.x, event.y
         items = under_cursor(x, y)
 
@@ -519,12 +520,12 @@ class HyperbolaTool(Tool):
                 self.curr_hyperbola = add_graphic(g.Hyperbola, self.f1, f2, k_point)
 
     def left_drag(self, event):
-        """Moves the k point of the hyperbola."""
+        '''Moves the k point of the hyperbola.'''
         if self.k_point:
             self.k_point.set_coord(event.x, event.y)
 
     def left_release(self, event):
-        """Finishes the hyperbola."""
+        '''Finishes the hyperbola.'''
         if self.f1 and self.f2 and self.k_point:
             x, y = event.x, event.y
             items = under_cursor(x, y, self.k_point.handle)
@@ -551,7 +552,7 @@ class BisectTool(Tool):
         self.r1 = self.v = self.r2 = None
 
     def left_click(self, event):
-        """Pick points that form an angle."""
+        '''Pick points that form an angle.'''
         items = under_cursor(event.x, event.y)
 
         if items and items['Point']:
@@ -565,7 +566,7 @@ class BisectTool(Tool):
                 self.r2 = graphics[point_handle]
 
     def left_release(self, event):
-        """Finish the angle."""
+        '''Finish the angle.'''
         if self.r1 and self.v and self.r2:
             add_graphic(g.Bisect, self.r1, self.v, self.r2)
             self.r1 = self.v = self.r2 = None
@@ -594,7 +595,7 @@ class MindistTool(Tool):
         c.itemconfigure(self.help_text_handle, text='')
 
     def left_click(self, event):
-        """Select points to find the minimum distance from."""
+        '''Select points to find the minimum distance from.'''
         items = under_cursor(event.x, event.y)
 
         if items and items['Point']:
