@@ -9,16 +9,10 @@ c = None
 global current_color
 
 
-class Operations(object):
-    def __init__(self, master):
-        self.children = []
-        self.master = master
-
-
 def operations(method):
     @wraps(method)
     def wrapper(graphic, *args, **kwargs):
-        graphic.operations = Operations(graphic)
+        graphic.children = []
         method(graphic, *args, **kwargs)
     return wrapper
 
@@ -53,26 +47,8 @@ class GraphicType(type):
 class Graphic(object):
     __metaclass__ = GraphicType
 
-    ops = (
-        'notify',
-        'change_parent',
-        'add_child',
-        'remove_child',
-        'become_child',
-        'lower',
-        'select',
-        'deselect',
-        'delete',
-    )
-
-    def __getattr__(self, attr):
-        if attr in self.ops and hasattr(self.operations, attr):
-            return getattr(self.operations, attr)
-        else:
-            raise AttributeError(attr)
-
     def add_child(self, child):
-        self.operations.children.append(child)
+        self.children.append(child)
 
     def become_child(self):
         for parent in self.parents:
@@ -87,11 +63,11 @@ class Graphic(object):
     def delete(self):
         c.delete(self.handle)
 
-        for child in self.operations.children:
+        for child in self.children:
             child.delete()
 
     def deselect(self):
-        for child in self.operations.children:
+        for child in self.children:
             child.deselect()
 
     def lower(self):
@@ -99,14 +75,14 @@ class Graphic(object):
         c.lower(1) # the grid
 
     def notify(self):
-        for child in self.operations.children:
+        for child in self.children:
             child.update()
 
     def remove_child(self, child):
-        self.operations.children.remove(child)
+        self.children.remove(child)
 
     def select(self):
-        for child in self.operations.children:
+        for child in self.children:
             child.select()
 
 
@@ -1046,4 +1022,4 @@ class Mindist(Graphic):
         for parent in self.parents:
             c.itemconfigure(parent.handle, fill='red')
 
-        self.operations.delete()
+        self.delete()
