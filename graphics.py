@@ -14,41 +14,6 @@ class Operations(object):
         self.children = []
         self.master = master
 
-    def notify(self):
-        for child in self.children:
-            child.update()
-
-    def change_parent(self, index, new_parent):
-        master = self.master
-        master.parents[index].remove_child(master)
-        master.parents[index] = new_parent
-        master.parents[index].add_child(master)
-        master.update()
-
-    def add_child(self, child):
-        self.children.append(child)
-
-    def remove_child(self, child):
-        self.children.remove(child)
-
-    def become_child(self):
-        master = self.master
-
-        for parent in master.parents:
-            parent.add_child(master)
-
-    def lower(self):
-        c.lower(self.master.handle)
-        c.lower(1) # the grid
-
-    def select(self):
-        for child in self.children:
-            child.select()
-
-    def deselect(self):
-        for child in self.children:
-            child.deselect()
-
 
 def operations(method):
     @wraps(method)
@@ -106,11 +71,43 @@ class Graphic(object):
         else:
             raise AttributeError(attr)
 
+    def add_child(self, child):
+        self.operations.children.append(child)
+
+    def become_child(self):
+        for parent in self.parents:
+            parent.add_child(self)
+
+    def change_parent(self, index, new_parent):
+        self.parents[index].remove_child(self)
+        self.parents[index] = new_parent
+        self.parents[index].add_child(self)
+        self.update()
+
     def delete(self):
         c.delete(self.handle)
 
         for child in self.operations.children:
             child.delete()
+
+    def deselect(self):
+        for child in self.operations.children:
+            child.deselect()
+
+    def lower(self):
+        c.lower(self.handle)
+        c.lower(1) # the grid
+
+    def notify(self):
+        for child in self.operations.children:
+            child.update()
+
+    def remove_child(self, child):
+        self.operations.children.remove(child)
+
+    def select(self):
+        for child in self.operations.children:
+            child.select()
 
 
 class Point(Graphic):
