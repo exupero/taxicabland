@@ -11,50 +11,50 @@ global current_color
 
 class Operations(object):
     def __init__(self, master):
-        self.__children = []
-        self.__master = master
+        self.children = []
+        self.master = master
 
     def notify(self):
-        for child in self.__children:
+        for child in self.children:
             child.update()
 
     def change_parent(self, index, new_parent):
-        master = self.__master
+        master = self.master
         master.parents[index].remove_child(master)
         master.parents[index] = new_parent
         master.parents[index].add_child(master)
         master.update()
 
     def add_child(self, child):
-        self.__children.append(child)
+        self.children.append(child)
 
     def remove_child(self, child):
-        self.__children.remove(child)
+        self.children.remove(child)
 
     def become_child(self):
-        master = self.__master
+        master = self.master
 
         for parent in master.parents:
             parent.add_child(master)
 
     def lower(self):
-        c.lower(self.__master.handle)
+        c.lower(self.master.handle)
         c.lower(1) # the grid
 
     def select(self):
-        for child in self.__children:
+        for child in self.children:
             child.select()
 
     def deselect(self):
-        for child in self.__children:
+        for child in self.children:
             child.deselect()
 
     def delete(self):
-        master = self.__master
+        master = self.master
 
         c.delete(master.handle)
 
-        for child in self.__children:
+        for child in self.children:
             child.delete()
 
         if hasattr(master, 'delete_extras'):
