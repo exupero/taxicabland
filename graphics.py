@@ -9,7 +9,7 @@ c = None
 global current_color
 
 
-def operations(method):
+def setup_children(method):
     @wraps(method)
     def wrapper(graphic, *args, **kwargs):
         graphic.children = []
@@ -36,7 +36,7 @@ def notifies(method):
 class GraphicType(type):
     def __new__(cls, name, bases, attrs):
         if '__init__' in attrs:
-            attrs['__init__'] = operations(updates(attrs['__init__']))
+            attrs['__init__'] = setup_children(updates(attrs['__init__']))
 
         if 'update' in attrs:
             attrs['update'] = notifies(attrs['update'])
