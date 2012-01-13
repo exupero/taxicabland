@@ -112,11 +112,6 @@ class Graphic(object):
         for child in self.operations.children:
             child.delete()
 
-        self.delete_extras()
-
-    def delete_extras(self):
-        pass
-
 
 class Point(Graphic):
     size = 5
@@ -377,7 +372,8 @@ class Ellipse(Graphic):
         c.coords(self.tielines,
             f1x, f1y, kx, ky, f2x, f2y)
 
-    def delete_extras(self):
+    def delete(self):
+        super(Ellipse, self).delete()
         c.delete(self.tielines)
 
 
@@ -493,7 +489,8 @@ class Midset(Graphic):
 
         make_midset(p1,p2)
 
-    def delete_extras(self):
+    def delete(self):
+        super(Midset, self).delete()
         c.delete(self.block1)
         c.delete(self.block2)
 
@@ -636,7 +633,8 @@ class Perpendicular(Graphic):
             # The midset.
             make_midset(p1, p2)
 
-    def delete_extras(self):
+    def delete(self):
+        super(Perpendicular, self).delete()
         c.delete(self.block1)
         c.delete(self.block2)
 
@@ -888,7 +886,8 @@ class Hyperbola(Graphic):
         make_hyperbola(focus1, focus2, 0)
         make_hyperbola(focus2, focus1, 1)
 
-    def delete_extras(self):
+    def delete(self):
+        super(Hyperbola, self).delete()
         c.delete(*self.mid_handles)
         c.delete(*self.arm_handles)
         c.delete(self.tielines)
