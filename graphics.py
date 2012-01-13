@@ -49,17 +49,6 @@ class Operations(object):
         for child in self.children:
             child.deselect()
 
-    def delete(self):
-        master = self.master
-
-        c.delete(master.handle)
-
-        for child in self.children:
-            child.delete()
-
-        if hasattr(master, 'delete_extras'):
-            getattr(master, 'delete_extras')()
-
 
 def operations(method):
     @wraps(method)
@@ -116,6 +105,17 @@ class Graphic(object):
             return getattr(self.operations, attr)
         else:
             raise AttributeError(attr)
+
+    def delete(self):
+        c.delete(self.handle)
+
+        for child in self.operations.children:
+            child.delete()
+
+        self.delete_extras()
+
+    def delete_extras(self):
+        pass
 
 
 class Point(Graphic):
