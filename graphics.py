@@ -1,7 +1,7 @@
 from itertools import cycle
 
 from decorators import updates, notifies
-from utils import dist, find_intersect, find_intersection
+from utils import dist, find_intersection
 
 
 c = None
@@ -13,9 +13,6 @@ current_color = cycle([
     '#ff33cc', # Pink
     '#00ffff', # Cyan
 ])
-
-
-
 
 
 class GraphicType(type):
@@ -109,15 +106,7 @@ class Point(Graphic):
         c.lift(self.handle)
 
 
-class PointOnLine(Graphic):
-    size = 5
-
-    new_specs = {
-        'fill': 'red',
-        'outline': 'black',
-        'width': 2,
-        'tags': 'Point'}
-
+class PointOnLine(Point):
     def create(self, line, x, y, position=None, locked=False):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.parents = [line]
@@ -136,10 +125,6 @@ class PointOnLine(Graphic):
                 self.position = float(y - ay) / (by - ay)
 
         self.locked = locked
-
-    @updates
-    def set_coord(self, x,y):
-        self.coord = x,y
 
     def update(self):
         ax, ay = self.parents[0].parents[0].coord
@@ -169,30 +154,6 @@ class PointOnLine(Graphic):
         c.coords(self.handle,
             x - size, y - size,
             x + size, y + size)
-
-
-class PointOfIntersection(Graphic):
-    size = 5
-
-    new_specs = {
-        'fill': 'red',
-        'outline': 'blue',
-        'width': 2,
-        'tags': 'Point'}
-
-    def create(self, (x, y), object1, object2):
-        self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
-        self.parents = [object1, object2]
-        self.become_child()
-        self.coord = x, y
-
-    def update(self):
-        a, b = self.parents
-        size = self.size
-        x, y = find_intersect(a.handle, b.handle, 0, 0, 0, 2000, 2000)
-
-        c.coords(self.handle, x - size, y - size, x + size, y + size)
-        c.lift(self.handle)
 
 
 class Line(Graphic):
@@ -230,16 +191,10 @@ class Line(Graphic):
         c.coords(self.handle, ax, ay, bx, by)
 
 
-class Circle(Graphic):
+class Circle(Line):
     new_specs = {
         'width': 2,
         'tags': 'Circle'}
-
-    selected_specs = {
-        'fill': 'black'}
-
-    unselected_specs = {
-        'fill': 'black'}
 
     def create(self, center_point, radius_point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
@@ -266,16 +221,10 @@ class Circle(Graphic):
             cx - radius, cy)
 
 
-class Ellipse(Graphic):
+class Ellipse(Line):
     new_specs = {
         'width': 2,
         'tags': 'Ellipse'}
-
-    selected_specs = {
-        'fill': 'black'}
-
-    unselected_specs = {
-        'fill': 'black'}
 
     tieline_specs = {
         'fill': 'green',
