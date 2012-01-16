@@ -1,11 +1,21 @@
+from itertools import cycle
+
 from decorators import updates, notifies
-from utils import current_color, dist, find_intersect, find_intersection
+from utils import dist, find_intersect, find_intersection
 
 
 c = None
 
+current_color = cycle([
+    '#00cc00', # Green
+    '#3300ff', # Blue
+    '#ff9900', # Orange
+    '#ff33cc', # Pink
+    '#00ffff', # Cyan
+])
 
-global current_color
+
+
 
 
 class GraphicType(type):

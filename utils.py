@@ -1,15 +1,4 @@
-from itertools import cycle
-
 import graphics
-
-
-current_color = cycle([
-    '#00cc00', # Green
-    '#3300ff', # Blue
-    '#ff9900', # Orange
-    '#ff33cc', # Pink
-    '#00ffff', # Cyan
-])
 
 
 def dist(a, b):
