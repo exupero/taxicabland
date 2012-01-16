@@ -31,6 +31,7 @@ class Graphic(object):
 
     def __init__(self, *args, **kwargs):
         self.children = []
+        self.create_handles()
         self.create(*args, **kwargs)
 
     def add_child(self, child):
@@ -45,6 +46,10 @@ class Graphic(object):
         self.parents[index] = new_parent
         self.parents[index].add_child(self)
         self.update()
+
+    def create_handles(self, canvas_method_name=None):
+        canvas_method = getattr(c, canvas_method_name or self.canvas_method_name)
+        self.handle = canvas_method(0, 0, 0, 0, **self.new_specs)
 
     def delete(self):
         c.delete(self.handle)
@@ -74,6 +79,7 @@ class Graphic(object):
 
 class Point(Graphic):
     size = 5
+    canvas_method_name = 'create_oval'
 
     new_specs = {
         'fill': 'red',
@@ -88,7 +94,6 @@ class Point(Graphic):
         'outline': ''}
 
     def create(self, x, y):
-        self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.parents = []
         self.coord = x,y
 
@@ -108,7 +113,6 @@ class Point(Graphic):
 
 class PointOnLine(Point):
     def create(self, line, x, y, position=None, locked=False):
-        self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.parents = [line]
         self.become_child()
         self.coord = x, y
@@ -157,6 +161,8 @@ class PointOnLine(Point):
 
 
 class Line(Graphic):
+    canvas_method_name = 'create_line'
+
     new_specs = {
         'width': 2,
         'tags': 'Line'}
@@ -168,7 +174,6 @@ class Line(Graphic):
         'fill': 'black'}
 
     def create(self, a, b):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [a,b]
         self.become_child()
         self.lower()
@@ -197,7 +202,6 @@ class Circle(Line):
         'tags': 'Circle'}
 
     def create(self, center_point, radius_point):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [center_point, radius_point]
         self.radius = dist(*self.parents)
         self.become_child()
@@ -232,7 +236,6 @@ class Ellipse(Line):
         'tags': 'Ellipse'}
 
     def create(self, focus1, focus2, k_point):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.tielines = c.create_line(0, 0, 0, 0, **self.tieline_specs)
         self.parents = [focus1, focus2, k_point]
         self.k = dist(focus1.coord, k_point.coord) + dist(focus2.coord, k_point.coord)
@@ -301,15 +304,17 @@ class Midset(Graphic):
         'tags': 'Midset'}
 
     def create(self, a, b):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
-        self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
-        self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
         self.parents = [a,b]
         self.become_child()
         c.lower(self.handle)
         c.lower(self.block1)
         c.lower(self.block2)
         c.lower(1) # the grid
+
+    def create_handles(self):
+        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
+        self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
+        self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
 
     def update(self):
         p1, p2 = self.parents
@@ -419,15 +424,17 @@ class Perpendicular(Graphic):
         'tags': 'Midset'}
 
     def create(self, line, point):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
-        self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
-        self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
         self.parents = [line, point]
         self.become_child()
         c.lower(self.handle)
         c.lower(self.block1)
         c.lower(self.block2)
         c.lower(1) # the grid
+
+    def create_handles(self):
+        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
+        self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
+        self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
 
     def update(self):
         line, p = self.parents
@@ -550,14 +557,13 @@ class Perpendicular(Graphic):
         c.delete(self.block2)
 
 
-class Parallel(Graphic):
+class Parallel(Line):
     new_specs = {
         'fill': 'black',
         'width': 2,
         'tags': 'Line'}
 
     def create(self, line, point):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [line, point]
         self.become_child()
         self.lower()
@@ -581,14 +587,13 @@ class Parallel(Graphic):
         c.coords(self.handle, p1[0], p1[1], p2[0], p2[1])
 
 
-class Parabola(Graphic):
+class Parabola(Line):
     new_specs = {
         'fill': 'blue',
         'width': 2,
         'tags': 'Parabola'}
 
     def create(self, focus, directrix):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [focus, directrix]
         self.become_child()
         self.lower()
@@ -677,18 +682,6 @@ class Hyperbola(Graphic):
         'tags': 'Hyperbola'}
 
     def create(self, f1, f2, k_point):
-        self.handle = c.create_oval(0, 0, 0, 0)
-        self.mid_handles = [
-            c.create_line(0, 0, 0, 0, **self.mid_specs),
-            c.create_line(0, 0, 0, 0, **self.mid_specs)]
-
-        self.arm_handles = [
-            c.create_rectangle(0, 0, 0, 0, **self.arm_specs),
-            c.create_rectangle(0, 0, 0, 0, **self.arm_specs),
-            c.create_rectangle(0, 0, 0, 0, **self.arm_specs),
-            c.create_rectangle(0, 0, 0, 0, **self.arm_specs)]
-        self.tielines = c.create_line(0, 0, 0, 0, **self.tieline_specs)
-
         self.parents = [f1,f2,k_point]
         self.become_child()
 
@@ -699,6 +692,18 @@ class Hyperbola(Graphic):
 
         c.lower(self.tielines)
         c.lower(1) # the grid
+
+    def create_handles(self):
+        self.handle = c.create_oval(0, 0, 0, 0)
+        self.mid_handles = [
+            c.create_line(0, 0, 0, 0, **self.mid_specs),
+            c.create_line(0, 0, 0, 0, **self.mid_specs)]
+        self.arm_handles = [
+            c.create_rectangle(0, 0, 0, 0, **self.arm_specs),
+            c.create_rectangle(0, 0, 0, 0, **self.arm_specs),
+            c.create_rectangle(0, 0, 0, 0, **self.arm_specs),
+            c.create_rectangle(0, 0, 0, 0, **self.arm_specs)]
+        self.tielines = c.create_line(0, 0, 0, 0, **self.tieline_specs)
 
     def update(self):
         focus1, focus2, k_point = self.parents
@@ -804,14 +809,13 @@ class Hyperbola(Graphic):
         c.delete(self.tielines)
 
 
-class Bisect(Graphic):
+class Bisect(Line):
     new_specs = {
         'fill': 'blue',
         'width': 2,
         'tags': 'Bisect'}
 
     def create(self, r1, v, r2):
-        self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [r1, v, r2]
         self.become_child()
         self.lower()
@@ -900,6 +904,8 @@ class Bisect(Graphic):
 
 
 class Mindist(Graphic):
+    canvas_method_name = 'create_rectangle'
+
     new_area = {
         'stipple': 'gray50',
         'width': 0,
@@ -914,10 +920,10 @@ class Mindist(Graphic):
 
         if len(points) % 2 == 0:
             self.new_area['fill'] = color
-            self.handle = c.create_rectangle(0, 0, 0, 0, **self.new_area)
+            self.create_handles()
         else:
             self.new_spot['fill'] = color
-            self.handle = c.create_oval(0, 0, 0, 0, **self.new_spot)
+            self.create_handles('create_oval')
 
         self.parents = points
         self.become_child()
