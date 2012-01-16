@@ -1,5 +1,4 @@
-from functools import wraps
-
+from decorators import setup_children, updates, notifies
 from utils import current_color, dist, find_intersect, find_intersection
 
 
@@ -7,30 +6,6 @@ c = None
 
 
 global current_color
-
-
-def setup_children(method):
-    @wraps(method)
-    def wrapper(graphic, *args, **kwargs):
-        graphic.children = []
-        method(graphic, *args, **kwargs)
-    return wrapper
-
-
-def updates(method):
-    @wraps(method)
-    def wrapper(graphic, *args, **kwargs):
-        method(graphic, *args, **kwargs)
-        graphic.update()
-    return wrapper
-
-
-def notifies(method):
-    @wraps(method)
-    def wrapper(graphic, *args, **kwargs):
-        method(graphic, *args, **kwargs)
-        graphic.notify()
-    return wrapper
 
 
 class GraphicType(type):
@@ -1021,5 +996,3 @@ class Mindist(Graphic):
     def delete(self):
         for parent in self.parents:
             c.itemconfigure(parent.handle, fill='red')
-
-        self.delete()
