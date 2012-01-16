@@ -47,9 +47,9 @@ class Graphic(object):
         self.parents[index].add_child(self)
         self.update()
 
-    def create_handles(self, canvas_method_name=None):
-        canvas_method = getattr(c, canvas_method_name or self.canvas_method_name)
-        self.handle = canvas_method(0, 0, 0, 0, **self.new_specs)
+    def create_handles(self, shape=None, specs=None):
+        canvas_method = getattr(c, 'create_' + (shape or self.shape))
+        self.handle = canvas_method(0, 0, 0, 0, **(specs or self.new_specs))
 
     def delete(self):
         c.delete(self.handle)
@@ -79,7 +79,7 @@ class Graphic(object):
 
 class Point(Graphic):
     size = 5
-    canvas_method_name = 'create_oval'
+    shape = 'oval'
 
     new_specs = {
         'fill': 'red',
@@ -161,7 +161,7 @@ class PointOnLine(Point):
 
 
 class Line(Graphic):
-    canvas_method_name = 'create_line'
+    shape = 'line'
 
     new_specs = {
         'width': 2,
@@ -904,8 +904,6 @@ class Bisect(Line):
 
 
 class Mindist(Graphic):
-    canvas_method_name = 'create_rectangle'
-
     new_area = {
         'stipple': 'gray50',
         'width': 0,
@@ -920,10 +918,10 @@ class Mindist(Graphic):
 
         if len(points) % 2 == 0:
             self.new_area['fill'] = color
-            self.create_handles()
+            self.create_handles(shape='rectangle', pecs=self.new_area)
         else:
             self.new_spot['fill'] = color
-            self.create_handles('create_oval')
+            self.create_handles(shape='oval', specs=self.new_spot)
 
         self.parents = points
         self.become_child()
