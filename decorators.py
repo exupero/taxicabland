@@ -1,14 +1,6 @@
 from functools import wraps
 
 
-def setup_children(method):
-    @wraps(method)
-    def wrapper(graphic, *args, **kwargs):
-        graphic.children = []
-        method(graphic, *args, **kwargs)
-    return wrapper
-
-
 def updates(method):
     @wraps(method)
     def wrapper(graphic, *args, **kwargs):

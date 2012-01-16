@@ -1,4 +1,4 @@
-from decorators import setup_children, updates, notifies
+from decorators import updates, notifies
 from utils import current_color, dist, find_intersect, find_intersection
 
 
@@ -11,7 +11,7 @@ global current_color
 class GraphicType(type):
     def __new__(cls, name, bases, attrs):
         if '__init__' in attrs:
-            attrs['__init__'] = setup_children(updates(attrs['__init__']))
+            attrs['__init__'] = updates(attrs['__init__'])
 
         if 'update' in attrs:
             attrs['update'] = notifies(attrs['update'])
@@ -21,6 +21,10 @@ class GraphicType(type):
 
 class Graphic(object):
     __metaclass__ = GraphicType
+
+    def __init__(self, *args, **kwargs):
+        self.children = []
+        self.create(*args, **kwargs)
 
     def add_child(self, child):
         self.children.append(child)
@@ -76,7 +80,7 @@ class Point(Graphic):
     unselected_specs = {
         'outline': ''}
 
-    def __init__(self, x, y):
+    def create(self, x, y):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.parents = []
         self.coord = x,y
@@ -104,7 +108,7 @@ class PointOnLine(Graphic):
         'width': 2,
         'tags': 'Point'}
 
-    def __init__(self, line, x, y, position=None, locked=False):
+    def create(self, line, x, y, position=None, locked=False):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.parents = [line]
         self.become_child()
@@ -166,7 +170,7 @@ class PointOfIntersection(Graphic):
         'width': 2,
         'tags': 'Point'}
 
-    def __init__(self, (x, y), object1, object2):
+    def create(self, (x, y), object1, object2):
         self.handle = c.create_oval(0, 0, 0, 0, **self.new_specs)
         self.parents = [object1, object2]
         self.become_child()
@@ -192,7 +196,7 @@ class Line(Graphic):
     unselected_specs = {
         'fill': 'black'}
 
-    def __init__(self, a, b):
+    def create(self, a, b):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [a,b]
         self.become_child()
@@ -227,7 +231,7 @@ class Circle(Graphic):
     unselected_specs = {
         'fill': 'black'}
 
-    def __init__(self, center_point, radius_point):
+    def create(self, center_point, radius_point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [center_point, radius_point]
         self.radius = dist(*self.parents)
@@ -268,7 +272,7 @@ class Ellipse(Graphic):
         'width': 1,
         'tags': 'Ellipse'}
 
-    def __init__(self, focus1, focus2, k_point):
+    def create(self, focus1, focus2, k_point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.tielines = c.create_line(0, 0, 0, 0, **self.tieline_specs)
         self.parents = [focus1, focus2, k_point]
@@ -337,7 +341,7 @@ class Midset(Graphic):
         'width': 2,
         'tags': 'Midset'}
 
-    def __init__(self, a, b):
+    def create(self, a, b):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
         self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
@@ -455,7 +459,7 @@ class Perpendicular(Graphic):
         'width': 2,
         'tags': 'Midset'}
 
-    def __init__(self, line, point):
+    def create(self, line, point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.block1 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
         self.block2 = c.create_rectangle(0, 0, 0, 0, **self.block_specs)
@@ -593,7 +597,7 @@ class Parallel(Graphic):
         'width': 2,
         'tags': 'Line'}
 
-    def __init__(self, line, point):
+    def create(self, line, point):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [line, point]
         self.become_child()
@@ -624,7 +628,7 @@ class Parabola(Graphic):
         'width': 2,
         'tags': 'Parabola'}
 
-    def __init__(self, focus, directrix):
+    def create(self, focus, directrix):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [focus, directrix]
         self.become_child()
@@ -713,7 +717,7 @@ class Hyperbola(Graphic):
         'width': 1,
         'tags': 'Hyperbola'}
 
-    def __init__(self, f1, f2, k_point):
+    def create(self, f1, f2, k_point):
         self.handle = c.create_oval(0, 0, 0, 0)
         self.mid_handles = [
             c.create_line(0, 0, 0, 0, **self.mid_specs),
@@ -847,7 +851,7 @@ class Bisect(Graphic):
         'width': 2,
         'tags': 'Bisect'}
 
-    def __init__(self, r1, v, r2):
+    def create(self, r1, v, r2):
         self.handle = c.create_line(0, 0, 0, 0, **self.new_specs)
         self.parents = [r1, v, r2]
         self.become_child()
@@ -946,7 +950,7 @@ class Mindist(Graphic):
         'outline': '',
         'tags': 'Mindist'}
 
-    def __init__(self, points):
+    def create(self, points):
         color = current_color.next()
 
         if len(points) % 2 == 0:
