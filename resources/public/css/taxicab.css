@@ -1,0 +1,125 @@
+html, body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14pt;
+  margin: 0;
+  height: 100%;
+}
+
+main {
+  height: 100%;
+}
+
+section {
+  position: relative;
+  height: 100%;
+}
+
+section.sidebar {
+  padding: 0.5rem;
+  float: left;
+  width: 15rem;
+}
+
+section.main {
+  left: 16rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+.tool {
+  border: 0;
+  display: block;
+  border-radius: 1rem;
+  font-size: 14pt;
+  background-color: whitesmoke;
+  outline: none;
+  width: 100%;
+  text-align: left;
+  padding-left: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.tool:hover {
+  background-color: #ddf;
+}
+
+.tool.selected {
+  background-color: #aaf;
+}
+
+.description {
+  padding: 0 0.8rem;
+  font-size: 12pt;
+}
+
+.description ul {
+  padding-left: 1rem;
+}
+
+.maximize {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.maximize > .maximize {
+  width: 100%;
+  height: 100%;
+}
+
+#explain {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+  text-align: center;
+}
+
+#workspace {
+  cursor: crosshair;
+}
+
+.relationship {
+  stroke: none;
+  fill: none;
+}
+
+#workspace[data-relationships=true] .relationship {
+  stroke: lightblue;
+}
+
+.grid {
+  stroke: #ddd;
+}
+
+.point {
+  stroke: white;
+  stroke-width: 1;
+}
+
+.area {
+  stroke: none;
+  fill: black;
+}
+
+.stroke {
+  stroke: black;
+  stroke-width: 2;
+  fill: none;
+}
+
+.join {
+  stroke-linecap: square;
+}
+
+.mindist {
+  stroke: none;
+  fill: lightgreen;
+}
+
+.mindist-area {
+  opacity: 0.5;
+}
