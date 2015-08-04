@@ -15,17 +15,33 @@ section {
 }
 
 section.sidebar {
-  padding: 0.5rem;
-  float: left;
+  position: absolute;
   width: 15rem;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: auto;
 }
 
 section.main {
-  left: 16rem;
+  position: absolute;
+  left: 15rem;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
 }
 
 button {
   cursor: pointer;
+}
+
+.inside {
+  padding: 0.5rem;
+}
+
+#meta button {
+  margin-right: 0.5rem;
 }
 
 .tool {
@@ -71,17 +87,6 @@ button {
   height: 100%;
 }
 
-#explain {
-  display: block;
-  width: 100%;
-  margin: 0.5rem 0 1rem;
-  text-align: center;
-}
-
-#workspace {
-  cursor: crosshair;
-}
-
 .relationship {
   stroke: none;
   fill: none;
@@ -100,26 +105,48 @@ button {
   stroke-width: 1;
 }
 
-.area {
-  stroke: none;
-  fill: black;
-}
-
 .stroke {
   stroke: black;
   stroke-width: 2;
-  fill: none;
+  fill: none !important;
+}
+
+.area {
+  stroke: none !important;
+  fill: black;
 }
 
 .join {
   stroke-linecap: square;
 }
 
+.midset {
+  stroke: blue;
+  fill: blue;
+  opacity: 0.5;
+}
+
+.hyperbola {
+  stroke: purple;
+  fill: purple;
+  opacity: 0.5;
+}
+
 .mindist {
-  stroke: none;
   fill: lightgreen;
 }
 
-.mindist-area {
+.mindist.area {
   opacity: 0.5;
+}
+
+#explain {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+  text-align: center;
+}
+
+#workspace {
+  cursor: crosshair;
 }

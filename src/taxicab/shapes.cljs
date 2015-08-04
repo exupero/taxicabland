@@ -165,7 +165,7 @@
       (list
         [:path {:class "relationship"
                 :d (apply str (map #(path [m %]) points))}]
-        [:path {:class "mindist mindist-area"
+        [:path {:class "mindist area"
                 :d (path [{:x m1x :y m1y}
                           {:x m1x :y m2y}
                           {:x m2x :y m2y}

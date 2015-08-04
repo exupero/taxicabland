@@ -29,7 +29,7 @@
                               :compiler {:output-to "out/js/taxicab.js"
                                          :warnings true
                                          :elide-asserts true
-                                         :externs ["externs/vdom.js"]
+                                         :externs ["externs/vdom.js" "externs/svg.js"]
                                          :optimizations :advanced
                                          :pretty-print false
                                          :output-wrapper false}}}})
