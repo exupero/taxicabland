@@ -5,7 +5,6 @@
             [cljs.core.match :refer-macros [match]]
             [clojure.walk :as walk]
             [vdom.elm :refer [foldp render!]]
-            [vdom.hooks :refer [hook]]
             [taxicab.tools :as tools]
             [taxicab.shapes :as shapes]))
 
@@ -17,7 +16,10 @@
     (aset c "y" y)
     (.matrixTransform c (-> svg .getScreenCTM .inverse))))
 
-(def size (juxt #(.-offsetWidth %) #(.-offsetHeight %)))
+(defn size [el]
+  (let [box (.getBoundingClientRect el)]
+    [(.-width box) (.-height box)]))
+
 (def workspace #(.getElementById js/document "workspace"))
 
 (defn pos [e]
@@ -130,6 +132,6 @@
                        :tool (first tools/tools)}
         models (foldp step initial-model actions)]
     (render! (async/map (ui actions) [models]) js/document.body)
-    (<! (timeout 10)) ; let DOM render
+    (<! (timeout 30)) ; let DOM render
     (put! actions :no-op) ; rerender to get grid
     (aset js/window "onresize" #(put! actions :no-op))))
