@@ -60,7 +60,7 @@
           (if relationships?
             [:button {:onclick #(emit :hide-relationships)} "Hide relationships"]
             [:button {:onclick #(emit :show-relationships)} "Show relationships"])
-          [:button {:onclick #(emit :reset)} "Clear Workspace"]]]]
+          [:button {:onclick #(emit :save)} "Save Image"]]]]
        [:section {:className "main"}
         [:div {:className "maximize"}
          [:svg {:id "workspace"
@@ -106,7 +106,9 @@
     :no-op model
     :show-relationships (assoc model :relationships? true)
     :hide-relationships (assoc model :relationships? false)
-    :reset (assoc model :shapes {})
+    :save (do
+            (js/saveSvgAsPng (workspace) "taxicab.png")
+            model)
     [:tool tool] (assoc model :tool tool)
     [:add-point loc] (let [id (gensym "point")]
                        (-> model
