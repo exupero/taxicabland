@@ -64,7 +64,6 @@
        [:section {:className "main"}
         [:div {:className "maximize"}
          [:svg {:id "workspace"
-                :class "maximize"
                 :onmousemove #(when holding (emit [:move (pos %)]))
                 :onmousedown #(emit [:add-point (pos %)])
                 :attributes {:data-relationships relationships?}}
@@ -107,7 +106,7 @@
     :show-relationships (assoc model :relationships? true)
     :hide-relationships (assoc model :relationships? false)
     :save (do
-            (js/saveSvgAsPng (workspace) "taxicab.png")
+            (js/saveSvgAsPng (workspace) "taxicab.png" (clj->js {:scale 3}))
             model)
     [:tool tool] (assoc model :tool tool)
     [:add-point loc] (let [id (gensym "point")]
