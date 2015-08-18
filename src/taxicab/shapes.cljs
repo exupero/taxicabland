@@ -59,11 +59,12 @@
       (when (not= c1 c2)
         (classed "midset" (apply sweep c2 (ex c2)))))))
 
-#_(defn perpendicular [emit {:keys [p1 p2 k]}]
-  (let [d (+ 5 (geo/dist-line k [p1 p2]))
-        [i1 i2] (filter #(geo/eq? d (dist k %))
-                  (intersections [p1 p2] (cardinal k d)))]
-    (midset emit {:p1 i1 :p2 i2})))
+(defn perpendicular [emit {:keys [p1 p2 k]}]
+  (let [i (geo/nearest k [p1 p2])]
+    (list
+      [:path {:class "relationship"
+              :d (str (path [p1 k] [k p2]))}]
+      (classed "perpendicular" (sweep k (extended i k) (extended k i))))))
 
 (defn bisect [emit {:keys [r1 v r2]}]
   (let [intersect (fn [r]
@@ -185,6 +186,7 @@
    :ray ray
    :parallel parallel
    :midset midset
+   :perpendicular perpendicular
    :bisect bisect
    :circle circle
    :ellipse ellipse

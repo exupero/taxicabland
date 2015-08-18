@@ -94,9 +94,7 @@
         "the second point")
       [:p {} "A midset is the set of points equidistant from two points."])}
 
-   ; Perpendicular may not make any sense in taxicab geometry. There are multiple
-   ; midsets that pass through the point off the line.
-   #_{:id :perpendicular
+   {:id :perpendicular
     :name "Perpendicular"
     :handler (multipoint :perpendicular [:p1 :p2 :k])
     :description
@@ -106,7 +104,7 @@
         "a point on the line"
         "another point on the line"
         "a point through which the perpendicular passes")
-      [:p {} "A perpendicular is a midset between two points on a line that passes through a given point."])}
+      [:p {} "A perpendicular is the shortest line between a point and a line, extended indefinitely."])}
 
    {:id :bisect
     :name "Bisect"
