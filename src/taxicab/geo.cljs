@@ -66,9 +66,11 @@
 (defn collinear? [a b c]
   (let [m1 (slope a b)
         m2 (slope b c)]
-    (and (eq? m1 m2)
-         (eq? (intercept m1 a)
-              (intercept m2 b)))))
+    (or (and (= (abs m1) js/Infinity)
+             (= (abs m2) js/Infinity))
+        (and (eq? m1 m2)
+             (eq? (intercept m1 a)
+                  (intercept m2 b))))))
 
 (defn ordered? [& ps]
   (let [xs (map :x ps)
