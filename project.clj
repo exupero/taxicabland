@@ -9,12 +9,15 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljsjs/virtual-dom "0.1.0-0"]
                  [vdom "0.1.0-SNAPSHOT"]]
-  :plugins [[lein-cljsbuild "0.3.2"]]
+  :plugins [[lein-cljsbuild "0.3.2"]
+            [lein-figwheel  "0.3.7"]]
   :cljsbuild {:builds {:dev {:source-paths ["src"]
                              :incremental true
                              :jar true
                              :assert true
-                             :compiler {:output-to "out/js/taxicab-dev.js"
+                             :figwheel {:on-jsload "taxicab.core/figwheel-reload"}
+                             :compiler {:main taxicab.core
+                                        :output-to "out/js/taxicab-dev.js"
                                         :output-dir "out/js"
                                         :warnings true
                                         :elide-asserts true

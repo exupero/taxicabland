@@ -168,5 +168,5 @@
     :handler mindist
     :description
     (list
-      [:p {} "Create an area with minimum distance from multiple points."]
-      [:p {} "A minimum distance is the area that's the least total distance from multiple points."])}])
+      [:p {} "Show the area with minimum total distance to multiple points."]
+      [:p {} "A minimum distance is the area that's the least sum total distance to more than one point."])}])

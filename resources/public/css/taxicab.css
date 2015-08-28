@@ -121,22 +121,34 @@ button {
 }
 
 .midset {
-  stroke: blue;
-  fill: blue;
   opacity: 0.5;
+}
+
+.midset .stroke {
+  stroke: blue;
+}
+
+.midset .area {
+  fill: blue;
 }
 
 .hyperbola {
-  stroke: purple;
-  fill: purple;
   opacity: 0.5;
 }
 
-.mindist {
+.hyperbola .stroke {
+  stroke: purple;
+}
+
+.hyperbola .area {
+  fill: purple;
+}
+
+.mindist .area, .mindist .point {
   fill: lightgreen;
 }
 
-.mindist.area {
+.mindist .area {
   opacity: 0.5;
 }
 

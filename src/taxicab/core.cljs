@@ -54,7 +54,7 @@
              text]
             (when selected?
               [:div {:className "description"}
-               (current-tool :description)])])
+               (tool :description)])])
          [:hr]
          [:div {:id "meta"}
           (if relationships?
@@ -77,9 +77,9 @@
                  [:line {:class "grid" :x2 "100%" :y1 i :y2 i}])]))
           (for [{t :type :as sh} (remove point? (vals shapes))]
             (shapes/render t emit (actualize shapes sh)))
-          (let [renderer (shapes/renderers :point)]
-            (for [sh (filter point? (vals shapes))]
-              (shapes/render :point emit sh)))]]
+          (for [sh (vals shapes)
+                :when (point? sh)]
+            (shapes/render :point emit sh))]]
         [:a {:href "https://github.com/exupero/taxicab-geometry"}
          [:img {:style {:position "absolute" :top 0 :right 0 :border 0}
                 :src "https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67"
@@ -125,14 +125,26 @@
                   model)
     [:release id] (assoc model :holding nil)))
 
-(go
-  (let [actions (chan)
-        initial-model {:shapes {}
-                       :holding nil
-                       :relationships? false
-                       :tool (first tools/tools)}
-        models (foldp step initial-model actions)]
-    (render! (async/map (ui actions) [models]) js/document.body)
-    (<! (timeout 30)) ; let DOM render
-    (put! actions :no-op) ; rerender to get grid
-    (aset js/window "onresize" #(put! actions :no-op))))
+(defonce actions (chan))
+
+(def initial-model
+  {:shapes {}
+   :holding nil
+   :relationships? false
+   :tool (first tools/tools)})
+
+(defonce models (foldp step initial-model actions))
+
+(render! (async/map (ui actions) [models]) js/document.body)
+
+(defonce setup
+  (do
+    (aset js/window "onresize" #(put! actions :no-op))
+    (go
+      ; Give DOM time to render and re-render once
+      ; elements have actual dimensions.
+      (<! (timeout 30))
+      (put! actions :no-op))))
+
+(defn figwheel-reload []
+  (put! actions :no-op))
