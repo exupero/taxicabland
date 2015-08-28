@@ -120,33 +120,20 @@ button {
   stroke-linecap: square;
 }
 
-.midset {
+.midset, .perpendicular, .hyperbola {
   opacity: 0.5;
 }
 
-.midset .stroke {
-  stroke: blue;
-}
+.midset .stroke { stroke: blue; }
+.midset .area { fill: blue; }
 
-.midset .area {
-  fill: blue;
-}
+.perpendicular .stroke { stroke: magenta; }
+.perpendicular .area { fill: magenta; }
 
-.hyperbola {
-  opacity: 0.5;
-}
+.hyperbola .stroke { stroke: purple; }
+.hyperbola .area { fill: purple; }
 
-.hyperbola .stroke {
-  stroke: purple;
-}
-
-.hyperbola .area {
-  fill: purple;
-}
-
-.mindist .area, .mindist .point {
-  fill: lightgreen;
-}
+.mindist .area, .mindist .point { fill: lightgreen; }
 
 .mindist .area {
   opacity: 0.5;

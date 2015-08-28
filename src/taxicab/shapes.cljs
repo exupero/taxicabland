@@ -63,11 +63,24 @@
        (apply sweep c2 (ex c2)))]))
 
 (defmethod render :perpendicular [_ emit {:keys [p1 p2 k]}]
-  (let [i (geo/nearest k [p1 p2])]
-    [:g {:class "perpendicular"}
-     [:path {:class "relationship"
-             :d (str (path [p1 k] [k p2]))}]
-     (sweep k (extended i k) (extended k i)) ]))
+  [:g {:class "perpendicular"}
+   [:path {:class "relationship"
+           :d (str (path [p1 k] [k p2]))}]
+   (let [slope (geo/slope p1 p2)]
+     (cond
+       (= 1 slope)
+       (list
+         (sweep k (step k 1 0) (step k 0 -1))
+         (sweep k (step k -1 0) (step k 0 1)))
+
+       (= -1 slope)
+       (list
+         (sweep k (step k -1 0) (step k 0 -1))
+         (sweep k (step k 1 0) (step k 0 1)))
+
+       :else
+       (let [i (geo/nearest k [p1 p2])]
+         (sweep k (extended i k) (extended k i)))))])
 
 (defmethod render :bisect [_ emit {:keys [r1 v r2]}]
   (let [intersect (fn [r]

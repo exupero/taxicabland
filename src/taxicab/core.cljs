@@ -40,13 +40,13 @@
 
 (defn ui [actions]
   (let [emit (partial put! actions)]
-    (fn [{current-tool :tool :keys [shapes holding relationships?]}]
+    (fn [{{curr-tool :id} :tool :keys [shapes holding relationships?]}]
       [:main {}
        [:section {:className "sidebar"}
         [:div {:className "inside"}
          [:a {:id "explain" :href "https://en.wikipedia.org/wiki/Taxicab_geometry"} "What is taxicab geometry?"]
          (for [{text :name :keys [id] :as tool} tools/tools
-               :let [selected? (= id (:id current-tool))]]
+               :let [selected? (= id curr-tool)]]
            [:div {:className "tool-container"}
             [:button {:id (str "tool-" (name id))
                       :className (str "tool" (when selected? " selected"))
