@@ -2,7 +2,6 @@ target
 .lein-repl-history
 .nrepl-port
 checkouts
+out
 
-!out
-out/js/*
-!out/js/taxicab.js
+resources/public/js-dev

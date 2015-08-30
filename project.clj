@@ -17,19 +17,19 @@
                              :assert true
                              :figwheel {:on-jsload "taxicab.core/figwheel-reload"}
                              :compiler {:main taxicab.core
-                                        :output-to "out/js/taxicab-dev.js"
-                                        :output-dir "out/js"
+                                        :output-to "resources/public/js-dev/taxicab.js"
+                                        :output-dir "resources/public/js-dev"
                                         :warnings true
                                         :elide-asserts true
                                         :optimizations :none
-                                        :source-map "out/js/taxicab-dev.js.map"
+                                        :source-map "resources/public/js-dev/taxicab.js.map"
                                         :pretty-print true
                                         :output-wrapper false}}
                        :prod {:source-paths ["src"]
                               :incremental true
                               :jar true
                               :assert true
-                              :compiler {:output-to "out/js/taxicab.js"
+                              :compiler {:output-to "resources/public/js/taxicab.js"
                                          :warnings true
                                          :elide-asserts true
                                          :externs ["externs/vdom.js" "externs/svg.js"]
