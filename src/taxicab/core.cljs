@@ -40,27 +40,30 @@
 
 (defn ui [actions]
   (let [emit (partial put! actions)]
-    (fn [{{curr-tool :id} :tool :keys [shapes holding relationships?]}]
+    (fn [{:keys [shapes holding history anti-history relationships? tool]}]
       [:main {}
        [:section {:className "sidebar"}
         [:div {:className "inside"}
          [:a {:id "explain" :href "https://en.wikipedia.org/wiki/Taxicab_geometry"} "What is taxicab geometry?"]
-         (for [{text :name :keys [id] :as tool} tools/tools
-               :let [selected? (= id curr-tool)]]
+         (for [{text :name :keys [id] :as a-tool} tools/tools
+               :let [selected? (-> tool :id (= id))]]
            [:div {:className "tool-container"}
             [:button {:id (str "tool-" (name id))
                       :className (str "tool" (when selected? " selected"))
-                      :onclick #(emit [:tool tool])}
+                      :onclick #(emit [:tool a-tool])}
              text]
             (when selected?
               [:div {:className "description"}
-               (tool :description)])])
+               (:description a-tool)])])
          [:hr]
          [:div {:id "meta"}
           (if relationships?
-            [:button {:onclick #(emit :hide-relationships)} "Hide relationships"]
-            [:button {:onclick #(emit :show-relationships)} "Show relationships"])
-          [:button {:onclick #(emit :save)} "Save Image"]]]]
+            [:button {:onclick #(emit :hide-relationships)} "Hide Relationships"]
+            [:button {:onclick #(emit :show-relationships)} "Show Relationships"])
+          [:button {:onclick #(emit :save-image)} "Save Image"]
+          [:button {:onclick #(emit :clear)} "Clear Workspace"]
+          (if (seq history) [:button {:onclick #(emit :undo)} "Undo"])
+          (if (seq anti-history) [:button {:onclick #(emit :redo)} "Redo"])]]]
        [:section {:className "main"}
         [:div {:className "maximize"}
          [:svg {:id "workspace"
@@ -100,17 +103,35 @@
 (defn reposition [pt x y]
   (assoc pt :x x :y y))
 
+(defn snapshot [m]
+  (select-keys m [:points :shapes]))
+
+(defn push-history [m]
+  (update m :history conj (snapshot m)))
+
+(defn shift-history [m from to]
+  (let [hist (from m)
+        snap (snapshot m)]
+    (-> m
+      (merge (peek hist))
+      (assoc from (pop hist))
+      (update to conj snap))))
+
 (defn step [model action]
   (match action
     :no-op model
+    :clear (assoc model :points {} :shapes {})
     :show-relationships (assoc model :relationships? true)
     :hide-relationships (assoc model :relationships? false)
-    :save (do
-            (js/saveSvgAsPng (workspace) "taxicab.png" (clj->js {:scale 3}))
-            model)
+    :save-image (do
+                  (js/saveSvgAsPng (workspace) "taxicab.png" (clj->js {:scale 3}))
+                  model)
+    :undo (shift-history model :history :anti-history)
+    :redo (shift-history model :anti-history :history)
     [:tool tool] (assoc model :tool tool)
     [:add-point loc] (let [id (gensym "point")]
                        (-> model
+                         push-history
                          (add-shape {:id id
                                      :type :point
                                      :x (.-x loc)
@@ -125,13 +146,15 @@
                   model)
     [:release id] (assoc model :holding nil)))
 
-(defonce actions (chan))
-
 (def initial-model
   {:shapes {}
    :holding nil
    :relationships? false
-   :tool (first tools/tools)})
+   :tool (first tools/tools)
+   :history []
+   :anti-history []})
+
+(defonce actions (chan))
 
 (defonce models (foldp step initial-model actions))
 

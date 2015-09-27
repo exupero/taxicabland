@@ -38,7 +38,9 @@
     :name "Point"
     :handler point
     :description
-    [:p {} "Create a point."]}
+    (list
+      [:p {} "Create a point."]
+      [:p {} "Use the point tool to move points."])}
 
    {:id :line
     :name "Line"

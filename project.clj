@@ -10,7 +10,7 @@
                  [cljsjs/virtual-dom "0.1.0-0"]
                  [vdom "0.1.0-SNAPSHOT"]]
   :plugins [[lein-cljsbuild "0.3.2"]
-            [lein-figwheel  "0.3.7"]]
+            [lein-figwheel "0.3.7"]]
   :cljsbuild {:builds {:dev {:source-paths ["src"]
                              :incremental true
                              :jar true
