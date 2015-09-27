@@ -32,6 +32,10 @@ section.main {
   overflow: hidden;
 }
 
+p {
+  font-size: 12pt;
+}
+
 button {
   cursor: pointer;
 }
@@ -67,7 +71,6 @@ button {
 
 .description {
   padding: 0 0.8rem;
-  font-size: 12pt;
 }
 
 .description ul {

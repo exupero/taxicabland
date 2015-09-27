@@ -45,6 +45,7 @@
        [:section {:className "sidebar"}
         [:div {:className "inside"}
          [:a {:id "explain" :href "https://en.wikipedia.org/wiki/Taxicab_geometry"} "What is taxicab geometry?"]
+         [:p {} "To move points, use the Point tool."]
          (for [{text :name :keys [id] :as a-tool} tools/tools
                :let [selected? (-> tool :id (= id))]]
            [:div {:className "tool-container"}
