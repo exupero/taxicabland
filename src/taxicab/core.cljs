@@ -139,6 +139,7 @@
                          (assoc :holding id)
                          (apply-tool id)))
     [:hold id] (-> model
+                 push-history
                  (assoc :holding id)
                  (apply-tool id))
     [:move loc] (if-let [holding (:holding model)]
