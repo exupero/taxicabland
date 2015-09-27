@@ -40,7 +40,7 @@
 
 (defn ui [actions]
   (let [emit (partial put! actions)]
-    (fn [{:keys [shapes holding history anti-history relationships? tool]}]
+    (fn [{:keys [shapes holding history anti-history tool grid-spacing relationships?]}]
       [:main {}
        [:section {:className "sidebar"}
         [:div {:className "inside"}
@@ -63,21 +63,26 @@
           [:button {:onclick #(emit :save-image)} "Save Image"]
           [:button {:onclick #(emit :clear)} "Clear Workspace"]
           (if (seq history) [:button {:onclick #(emit :undo)} "Undo"])
-          (if (seq anti-history) [:button {:onclick #(emit :redo)} "Redo"])]]]
+          (if (seq anti-history) [:button {:onclick #(emit :redo)} "Redo"])
+          [:div {}
+           "Grid"
+           [:input {:type "range" :min 0 :max 40 :step 5 :value grid-spacing
+                    :onmousemove #(this-as input (put! actions [:grid (int (.-value input))]))}]]]]]
        [:section {:className "main"}
         [:div {:className "maximize"}
          [:svg {:id "workspace"
                 :onmousemove #(when holding (emit [:move (pos %)]))
+                :onmouseup #(emit [:release nil])
                 :onmousedown #(emit [:add-point (pos %)])
                 :attributes {:data-relationships relationships?}}
           (when-let [svg (.getElementById js/document "workspace")]
-            (let [[w h] (size svg)
-                  spacing 15]
-              [:g {}
-               (for [i (range 1 w spacing)]
-                 [:line {:class "grid" :x1 i :x2 i :y2 "100%"}])
-               (for [i (range 1 h spacing)]
-                 [:line {:class "grid" :x2 "100%" :y1 i :y2 i}])]))
+            (when (< 2 grid-spacing)
+              (let [[w h] (size svg)]
+                [:g {}
+                 (for [i (range 1 w grid-spacing)]
+                   [:line {:class "grid" :x1 i :x2 i :y2 "100%"}])
+                 (for [i (range 1 h grid-spacing)]
+                   [:line {:class "grid" :x2 "100%" :y1 i :y2 i}])])))
           (for [{t :type :as sh} (remove point? (vals shapes))]
             (shapes/render t emit (actualize shapes sh)))
           (for [sh (vals shapes)
@@ -103,39 +108,51 @@
 (defn reposition [pt x y]
   (assoc pt :x x :y y))
 
-(defn snapshot [m]
+(defn capture [scale]
+  (js/saveSvgAsPng (workspace) "taxicab.png" (clj->js {:scale scale})))
+
+(defn history-snapshot [m]
   (select-keys m [:points :shapes]))
 
 (defn push-history [m]
-  (update m :history conj (snapshot m)))
+  (update m :history conj (history-snapshot m)))
 
 (defn shift-history [m from to]
   (let [hist (from m)
-        snap (snapshot m)]
+        snap (history-snapshot m)]
     (-> m
       (merge (peek hist))
       (assoc from (pop hist))
       (update to conj snap))))
 
+(defn snap [spacing]
+  (if (< spacing 2)
+    identity
+    #(as-> % x
+       (/ x spacing)
+       (.round js/Math x)
+       (* x spacing))))
+
 (defn step [model action]
+  (spy action)
   (match action
     :no-op model
     :clear (assoc model :points {} :shapes {})
     :show-relationships (assoc model :relationships? true)
     :hide-relationships (assoc model :relationships? false)
-    :save-image (do
-                  (js/saveSvgAsPng (workspace) "taxicab.png" (clj->js {:scale 3}))
-                  model)
+    :save-image (do (capture 3) model)
     :undo (shift-history model :history :anti-history)
     :redo (shift-history model :anti-history :history)
+    [:grid size] (assoc model :grid-spacing size)
     [:tool tool] (assoc model :tool tool)
-    [:add-point loc] (let [id (gensym "point")]
+    [:add-point loc] (let [id (gensym "point")
+                           sn (snap (:grid-spacing model))]
                        (-> model
                          push-history
                          (add-shape {:id id
                                      :type :point
-                                     :x (.-x loc)
-                                     :y (.-y loc)})
+                                     :x (sn (.-x loc))
+                                     :y (sn (.-y loc))})
                          (assoc :holding id)
                          (apply-tool id)))
     [:hold id] (-> model
@@ -143,7 +160,10 @@
                  (assoc :holding id)
                  (apply-tool id))
     [:move loc] (if-let [holding (:holding model)]
-                  (update-in model [:shapes holding] reposition (.-x loc) (.-y loc))
+                  (let [sn (snap (:grid-spacing model))]
+                    (update-in model [:shapes holding] reposition
+                               (sn (.-x loc))
+                               (sn (.-y loc))))
                   model)
     [:release id] (assoc model :holding nil)))
 
@@ -152,6 +172,7 @@
    :holding nil
    :relationships? false
    :tool (first tools/tools)
+   :grid-spacing 15
    :history []
    :anti-history []})
 
