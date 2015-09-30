@@ -19,6 +19,7 @@
                              :compiler {:main taxicab.core
                                         :output-to "resources/public/js-dev/taxicab.js"
                                         :output-dir "resources/public/js-dev"
+                                        :asset-path "js-dev"
                                         :warnings true
                                         :elide-asserts true
                                         :optimizations :none
@@ -35,4 +36,5 @@
                                          :externs ["externs/vdom.js" "externs/svg.js"]
                                          :optimizations :advanced
                                          :pretty-print false
-                                         :output-wrapper false}}}})
+                                         :output-wrapper false}}}}
+  :figwheel  {:css-dirs  ["resources/public/css"]})

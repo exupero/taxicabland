@@ -1,8 +1,17 @@
+/*
+ colors:
+ - base, medium yellow: #A8A739
+ - bright yellow: #FFFE38
+ - dark yellow: #5B5B24
+ - black: #0F0F07
+*/
+
 html, body {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: 14pt;
   margin: 0;
   height: 100%;
+  color: #0F0F07;
 }
 
 main {
@@ -32,45 +41,82 @@ section.main {
   overflow: hidden;
 }
 
+h1 {
+  margin: 0;
+  text-align: center;
+}
+
 p {
   font-size: 12pt;
 }
 
+a {
+  color: #A8A739;
+}
+
+a:visited {
+  color: #5B5B24;
+}
+
 button {
+  border: none;
   cursor: pointer;
+  outline: none;
+}
+
+button, .widget {
+  font-size: 14pt;
+  border-radius: 0 1rem 1rem 0;
+  background: #FFFE38;
+  color: #0F0F07;
+  padding: 0.3rem 1rem;
+  margin-bottom: 0.2rem;
+  margin-left: -0.5rem;
+  transition: margin-left 0.2s ease-in-out;
+  text-align: left;
+  position: relative;
+  display: block;
+}
+
+button:before, .widget:before {
+  content: '';
+  display: block;
+  width: 16px;
+  height: 100%;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="16" height="10" fill="#0F0F07"><rect width="3" height="10"></rect><rect x="13" width="3" height="10"></rect><rect width="8" height="5"></rect><rect x="8" y="5" width="5" height="5"></rect></svg>') top left repeat-y;
+  position: absolute;
+  left: 0;
+  margin-left: -0.75rem;
+  margin-top: -0.3rem;
+}
+
+button:hover, button.selected {
+  margin-left: 0.25rem;
+}
+
+input {
+  cursor: pointer;
+  outline: none;
+}
+
+.widget {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.widget input {
+  margin-top: 0.1rem;
+  margin-left: 0.5rem;
+  height: 10px;
 }
 
 .inside {
-  padding: 0.5rem;
-}
-
-#meta button {
-  margin-right: 0.5rem;
-}
-
-.tool {
-  border: 0;
-  display: block;
-  border-radius: 1rem;
-  font-size: 14pt;
-  background-color: whitesmoke;
-  outline: none;
-  width: 100%;
-  text-align: left;
-  padding-left: 0.75rem;
-  margin-bottom: 0.2rem;
-}
-
-.tool:hover {
-  background-color: #ddf;
-}
-
-.tool.selected {
-  background-color: #aaf;
+  padding: 0.5rem 0.5rem 0;
 }
 
 .description {
-  padding: 0 0.8rem;
+  font-size: 12pt;
+  padding: 0 0 1.5rem 1.3rem;
 }
 
 .description ul {
@@ -93,6 +139,22 @@ button {
 .relationship {
   stroke: none;
   fill: none;
+}
+
+#tools button {
+  width: 95%;
+}
+
+#options {
+  margin: 3rem 0 1rem;
+}
+
+#options button, #options .widget {
+  font-size: small;
+}
+
+#workspace {
+  cursor: crosshair;
 }
 
 #workspace[data-relationships=true] .relationship {
@@ -143,12 +205,22 @@ button {
 }
 
 #explain {
+  font-size: smaller;
   display: block;
   width: 100%;
-  margin: 0.5rem 0 1rem;
   text-align: center;
 }
 
-#workspace {
-  cursor: crosshair;
+#tip {
+  text-align: center;
+  font-size: small;
+  border-radius: 5px;
+  padding: 0.5rem;
+  color: #5B5B24;
+  margin: 1.5rem 0;
+}
+
+#tip:before {
+  content: 'Tip: ';
+  font-style: italic;
 }

@@ -44,28 +44,29 @@
       [:main {}
        [:section {:className "sidebar"}
         [:div {:className "inside"}
+         [:h1 {} "Taxicabland"]
          [:a {:id "explain" :href "https://en.wikipedia.org/wiki/Taxicab_geometry"} "What is taxicab geometry?"]
-         [:p {} "To move points, use the Point tool."]
-         (for [{text :name :keys [id] :as a-tool} tools/tools
-               :let [selected? (-> tool :id (= id))]]
-           [:div {:className "tool-container"}
-            [:button {:id (str "tool-" (name id))
-                      :className (str "tool" (when selected? " selected"))
-                      :onclick #(emit [:tool a-tool])}
-             text]
-            (when selected?
-              [:div {:className "description"}
-               (:description a-tool)])])
-         [:hr]
-         [:div {:id "meta"}
+         [:div {:id "tip"} "Drag points with the Point tool."]
+         [:div {:id "tools"}
+          (for [{text :name :keys [id] :as a-tool} tools/tools
+                :let [selected? (-> tool :id (= id))]]
+            [:div {:className "tool-container"}
+             [:button {:id (str "tool-" (name id))
+                       :className (str "tool" (when selected? " selected"))
+                       :onclick #(emit [:tool a-tool])}
+              text]
+             (when selected?
+               [:div {:className "description"}
+                (:description a-tool)])])]
+         [:div {:id "options"}
+          (if (seq history) [:button {:onclick #(emit :undo)} "Undo"])
+          (if (seq anti-history) [:button {:onclick #(emit :redo)} "Redo"])
+          [:button {:onclick #(emit :save-image)} "Save Image"]
           (if relationships?
             [:button {:onclick #(emit :hide-relationships)} "Hide Relationships"]
             [:button {:onclick #(emit :show-relationships)} "Show Relationships"])
-          [:button {:onclick #(emit :save-image)} "Save Image"]
           [:button {:onclick #(emit :clear)} "Clear Workspace"]
-          (if (seq history) [:button {:onclick #(emit :undo)} "Undo"])
-          (if (seq anti-history) [:button {:onclick #(emit :redo)} "Redo"])
-          [:div {}
+          [:div {:className "widget"}
            "Grid"
            [:input {:type "range" :min 0 :max 40 :step 5 :value grid-spacing
                     :onmousemove #(this-as input (put! actions [:grid (int (.-value input))]))}]]]]]
@@ -135,10 +136,11 @@
        (* x spacing))))
 
 (defn step [model action]
-  (spy action)
   (match action
     :no-op model
-    :clear (assoc model :points {} :shapes {})
+    :clear (-> model
+             push-history
+             (assoc :points {} :shapes {}))
     :show-relationships (assoc model :relationships? true)
     :hide-relationships (assoc model :relationships? false)
     :save-image (do (capture 3) model)
