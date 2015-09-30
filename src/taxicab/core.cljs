@@ -81,9 +81,9 @@
             (when (< 2 grid-spacing)
               (let [[w h] (size svg)]
                 [:g {}
-                 (for [i (range 1 w grid-spacing)]
+                 (for [i (range 0 w grid-spacing)]
                    [:line {:class "grid" :x1 i :x2 i :y2 "100%"}])
-                 (for [i (range 1 h grid-spacing)]
+                 (for [i (range 0 h grid-spacing)]
                    [:line {:class "grid" :x2 "100%" :y1 i :y2 i}])])))
           (for [{t :type :as sh} (remove point? (vals shapes))]
             (shapes/render t emit (actualize shapes sh)))
