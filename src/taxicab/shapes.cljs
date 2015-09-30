@@ -65,7 +65,7 @@
 (defmethod render :perpendicular [_ emit {:keys [p1 p2 k]}]
   [:g {:class "perpendicular"}
    [:path {:class "relationship"
-           :d (str (path [p1 k] [k p2]))}]
+           :d (str (path [p1 k p2]))}]
    (let [slope (geo/slope p1 p2)]
      (cond
        (= 1 slope)
