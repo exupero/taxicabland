@@ -99,12 +99,32 @@ input {
   outline: none;
 }
 
+input[type=range] {
+  width: 150px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  background: #878787;
+  height: 2px;
+  border: none;
+  box-sizing: border-box;
+  border-radius: 3px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  margin-top: -7px;
+}
+
 .widget {
   cursor: pointer;
   display: inline-block;
 }
 
 .widget input {
+  background: #FFFE38;
   margin-top: 0.1rem;
   margin-left: 0.5rem;
   height: 10px;

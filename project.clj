@@ -37,4 +37,4 @@
                                          :optimizations :advanced
                                          :pretty-print false
                                          :output-wrapper false}}}}
-  :figwheel  {:css-dirs  ["resources/public/css"]})
+  :figwheel {:css-dirs ["resources/public/css"]})
