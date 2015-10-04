@@ -156,6 +156,27 @@ input[type=range]::-webkit-slider-thumb {
   height: 100%;
 }
 
+#explain {
+  font-size: smaller;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+#tip {
+  text-align: center;
+  font-size: small;
+  border-radius: 5px;
+  padding: 0.5rem;
+  color: #5B5B24;
+  margin: 1.5rem 0;
+}
+
+#tip:before {
+  content: 'Tip: ';
+  font-style: italic;
+}
+
 #tools button {
   width: 95%;
 }
@@ -174,6 +195,10 @@ input[type=range]::-webkit-slider-thumb {
 
 .grid {
   stroke: #ddd;
+}
+
+.shape {
+  opacity: 0.8;
 }
 
 .point {
@@ -196,42 +221,38 @@ input[type=range]::-webkit-slider-thumb {
   stroke-linecap: square;
 }
 
-.midset, .perpendicular, .hyperbola {
-  opacity: 0.5;
-}
+.color1 .stroke { stroke: #1f77b4; }
+.color1 .area { fill: #1f77b4; }
 
-.midset .stroke { stroke: blue; }
-.midset .area { fill: blue; }
+.color2 .stroke { stroke: #aec7e8; }
+.color2 .area { fill: #aec7e8; }
 
-.perpendicular .stroke { stroke: magenta; }
-.perpendicular .area { fill: magenta; }
+.color3 .stroke { stroke: #ff7f0e; }
+.color3 .area { fill: #ff7f0e; }
 
-.hyperbola .stroke { stroke: purple; }
-.hyperbola .area { fill: purple; }
+.color4 .stroke { stroke: #ffbb78; }
+.color4 .area { fill: #ffbb78; }
 
-.mindist .area, .mindist .point { fill: lightgreen; }
+.color5 .stroke { stroke: #2ca02c; }
+.color5 .area { fill: #2ca02c; }
 
-.mindist .area {
-  opacity: 0.5;
-}
+.color6 .stroke { stroke: #98df8a; }
+.color6 .area { fill: #98df8a; }
 
-#explain {
-  font-size: smaller;
-  display: block;
-  width: 100%;
-  text-align: center;
-}
+.color7 .stroke { stroke: #d62728; }
+.color7 .area { fill: #d62728; }
 
-#tip {
-  text-align: center;
-  font-size: small;
-  border-radius: 5px;
-  padding: 0.5rem;
-  color: #5B5B24;
-  margin: 1.5rem 0;
-}
+.color8 .stroke { stroke: #ff9896; }
+.color8 .area { fill: #ff9896; }
 
-#tip:before {
-  content: 'Tip: ';
-  font-style: italic;
-}
+.color9 .stroke { stroke: #9467bd; }
+.color9 .area { fill: #9467bd; }
+
+.color10 .stroke { stroke: #c5b0d5; }
+.color10 .area { fill: #c5b0d5; }
+
+.color11 .stroke { stroke: #8c564b; }
+.color11 .area { fill: #8c564b; }
+
+.color12 .stroke { stroke: #c49c94; }
+.color12 .area { fill: #c49c94; }

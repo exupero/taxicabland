@@ -38,6 +38,9 @@
        %)
     (kernel shape)))
 
+(defn shapify [sh color]
+  (update-in sh [1 :class] str " shape " (if color (name color) "")))
+
 (defn ui [actions]
   (let [emit (partial put! actions)]
     (fn [{:keys [shapes holding history anti-history tool grid-spacing]}]
@@ -82,7 +85,10 @@
                  (for [i (range 0 h grid-spacing)]
                    [:line {:class "grid" :x2 "100%" :y1 i :y2 i}])])))
           (for [{t :type :as sh} (remove point? (vals shapes))]
-            (shapes/render t emit (actualize shapes sh)))
+            (as-> sh x
+              (actualize shapes x)
+              (shapes/render t emit x)
+              (shapify x (:color sh))))
           (for [sh (vals shapes)
                 :when (point? sh)]
             (shapes/render :point emit sh))]]
@@ -93,9 +99,16 @@
                 :attributes {:data-canonical-src "https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"}}]]]])))
 
 (defn add-shape [model {:keys [id] :as shape}]
-  (if shape
+  (cond
+    (nil? shape)
+    model
+
+    (or (point? shape) (get-in model [:shapes id]))
     (assoc-in model [:shapes id] shape)
-    model))
+
+    :else
+    (assoc-in (update model :colors rest) [:shapes id]
+              (assoc shape :color (first (model :colors))))))
 
 (defn apply-tool [{{tool :handler} :tool :as model} point]
   (let [[t sh] (tool point)]
@@ -168,6 +181,7 @@
   {:shapes {}
    :holding nil
    :tool (first tools/tools)
+   :colors (cycle (map #(keyword (str "color" %)) (range 1 13)))
    :grid-spacing 15
    :history []
    :anti-history []})
