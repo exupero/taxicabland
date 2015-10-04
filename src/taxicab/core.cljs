@@ -40,7 +40,7 @@
 
 (defn ui [actions]
   (let [emit (partial put! actions)]
-    (fn [{:keys [shapes holding history anti-history tool grid-spacing relationships?]}]
+    (fn [{:keys [shapes holding history anti-history tool grid-spacing]}]
       [:main {}
        [:section {:className "sidebar"}
         [:div {:className "inside"}
@@ -62,9 +62,6 @@
           (if (seq history) [:button {:onclick #(emit :undo)} "Undo"])
           (if (seq anti-history) [:button {:onclick #(emit :redo)} "Redo"])
           [:button {:onclick #(emit :save-image)} "Save Image"]
-          (if relationships?
-            [:button {:onclick #(emit :hide-relationships)} "Hide Relationships"]
-            [:button {:onclick #(emit :show-relationships)} "Show Relationships"])
           [:button {:onclick #(emit :clear)} "Clear Workspace"]
           [:div {:className "widget"}
            "Grid"
@@ -75,8 +72,7 @@
          [:svg {:id "workspace"
                 :onmousemove #(when holding (emit [:move (pos %)]))
                 :onmouseup #(emit [:release nil])
-                :onmousedown #(emit [:add-point (pos %)])
-                :attributes {:data-relationships relationships?}}
+                :onmousedown #(emit [:add-point (pos %)])}
           (when-let [svg (.getElementById js/document "workspace")]
             (when (< 2 grid-spacing)
               (let [[w h] (size svg)]
@@ -141,8 +137,6 @@
     :clear (-> model
              push-history
              (assoc :points {} :shapes {}))
-    :show-relationships (assoc model :relationships? true)
-    :hide-relationships (assoc model :relationships? false)
     :save-image (do (capture 3) model)
     :undo (shift-history model :history :anti-history)
     :redo (shift-history model :anti-history :history)
@@ -173,7 +167,6 @@
 (def initial-model
   {:shapes {}
    :holding nil
-   :relationships? false
    :tool (first tools/tools)
    :grid-spacing 15
    :history []

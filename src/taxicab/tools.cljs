@@ -11,7 +11,7 @@
 
 (defn multipoint
   ([t ks]
-   (first (multipoint t ks [])))
+   (fn [p] (multipoint t ks [p])))
   ([t ks ps]
    (if (= (count ks) (count ps))
      [(multipoint t ks) (shape t (zipmap ks ps))]

@@ -156,11 +156,6 @@ input[type=range]::-webkit-slider-thumb {
   height: 100%;
 }
 
-.relationship {
-  stroke: none;
-  fill: none;
-}
-
 #tools button {
   width: 95%;
 }
@@ -175,10 +170,6 @@ input[type=range]::-webkit-slider-thumb {
 
 #workspace {
   cursor: crosshair;
-}
-
-#workspace[data-relationships=true] .relationship {
-  stroke: lightblue;
 }
 
 .grid {

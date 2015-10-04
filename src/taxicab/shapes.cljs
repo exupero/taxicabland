@@ -54,8 +54,6 @@
         [c1 c2] (filter eq (concat (cardinal p1 d) (cardinal p2 d)))
         ex #(filter eq (cardinal % 1))]
     [:g {:class "midset"}
-     [:path {:class "relationship"
-             :d (str (path [m p1]) (path [m p2]))}]
      [:path {:class "stroke join"
              :d (path [c1 c2])}]
      (apply sweep c1 (ex c1))
@@ -64,8 +62,6 @@
 
 (defmethod render :perpendicular [_ emit {:keys [p1 p2 k]}]
   [:g {:class "perpendicular"}
-   [:path {:class "relationship"
-           :d (str (path [p1 k p2]))}]
    (let [slope (geo/slope p1 p2)]
      (cond
        (= 1 slope)
@@ -91,14 +87,10 @@
         c2 (intersect r2)
         m (midpoint c1 c2)]
     [:g {:class "bisect"}
-     [:path {:class "relationship"
-             :d (str (path [r1 m]) (path [r2 m]))}]
      (sweep v m)]))
 
 (defmethod render :circle [_ emit {:keys [c r]}]
   [:g {:class "circle"}
-   [:path {:class "relationship"
-           :d (path [c r])}]
    [:path {:class "stroke"
            :d (path (cardinal c (dist c r)) true)}]])
 
@@ -112,8 +104,6 @@
             (- (dist f1 f2))
             (/ 2))]
     [:g {:class "ellipse"}
-     [:path {:class "relationship"
-             :d (path [f1 k f2])}]
      [:path {:class "stroke"
              :d (path [{:x (- x1 r) :y y1}
                        {:x (- x1 r) :y y2}
@@ -133,8 +123,6 @@
             [c1] (filter eq (cardinal m1 1))
             [c2] (filter eq (cardinal m2 1))]
         [:g {:class "parabola"}
-         [:path {:class "relationship"
-                 :d (str (path [f m1]) (path [d1 m1]) (path [d2 m1]))}]
          [:path {:class "stroke"
                  :d (path [(extended m1 c1) m1 m2 (extended m2 c2)])}]])
       (let [m (midpoint f (geo/nearest f [d1 d2]))
@@ -143,8 +131,6 @@
             [c1] (filter eq (geo/corners f i1))
             [c2] (filter eq (geo/corners f i2))]
         [:g {:class "parabola"}
-         [:path {:class "relationship"
-                 :d (str (path [f m]) (path [d1 m]) (path [d2 m]))}]
          [:path {:class "stroke"
                  :d (path [(extended i1 c1) c1 m c2 (extended i2 c2)])}]]))))
 
@@ -157,8 +143,6 @@
                (filter eq)
                (apply sweep %))]
     [:g {:class "hyperbola"}
-     [:path {:class "relationship"
-             :d (path [f1 k f2])}]
      (if (zero? r)
        (list (hyp f1) (hyp f2))
        (let [wing (fn [a b]
@@ -179,18 +163,12 @@
            {m1x :x m1y :y} m1
            {m2x :x m2y :y} m2
            m (midpoint m1 m2)]
-       (list
-         [:path {:class "relationship"
-                 :d (apply str (map #(path [m %]) points))}]
-         [:path {:class "area"
-                 :d (path [{:x m1x :y m1y}
-                           {:x m1x :y m2y}
-                           {:x m2x :y m2y}
-                           {:x m2x :y m1y}
-                           {:x m1x :y m1y}])}]))
+       [:path {:class "area"
+               :d (path [{:x m1x :y m1y}
+                         {:x m1x :y m2y}
+                         {:x m2x :y m2y}
+                         {:x m2x :y m1y}
+                         {:x m1x :y m1y}])}])
      (let [{:keys [x y]} (geo/middle points)]
-       (list
-         [:path {:class "relationship"
-                 :d (apply str (map #(path [{:x x :y y} %]) points))}]
-         [:circle {:class "point"
-                   :cx x :cy y :r 5}])))])
+       [:circle {:class "point"
+                 :cx x :cy y :r 5}]))])
