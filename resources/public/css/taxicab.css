@@ -197,35 +197,40 @@ input[type=range]::-webkit-slider-thumb {
   stroke: #ddd;
 }
 
-.shape {
-  opacity: 0.8;
-}
-
-.point circle:hover, .shape:hover {
-  cursor: pointer;
-}
-
-.point text {
+text {
   font-size: 11pt;
   text-anchor: middle;
   fill: gray;
+  stroke-width: 0;
   display: none;
+}
+
+.stroked text:first-child {
+  stroke: white;
+  stroke-width: 3;
 }
 
 text::selection {
   background: transparent;
 }
 
-.point text.stroke {
-  stroke: white;
-  stroke-width: 2;
-}
-
-.labeled .point text {
+.labeled text {
   display: block;
 }
 
-.point .point {
+.shape {
+  opacity: 0.7;
+}
+
+.shape.selected {
+  opacity: 0.9;
+}
+
+.point circle:hover, .shape:hover {
+  cursor: pointer;
+}
+
+.point {
   stroke: white;
   stroke-width: 1;
 }
