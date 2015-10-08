@@ -201,7 +201,31 @@ input[type=range]::-webkit-slider-thumb {
   opacity: 0.8;
 }
 
-.point {
+.point circle:hover, .shape:hover {
+  cursor: pointer;
+}
+
+.point text {
+  font-size: 11pt;
+  text-anchor: middle;
+  fill: gray;
+  display: none;
+}
+
+text::selection {
+  background: transparent;
+}
+
+.point text.stroke {
+  stroke: white;
+  stroke-width: 2;
+}
+
+.labeled .point text {
+  display: block;
+}
+
+.point .point {
   stroke: white;
   stroke-width: 1;
 }
@@ -224,35 +248,26 @@ input[type=range]::-webkit-slider-thumb {
 .color1 .stroke { stroke: #1f77b4; }
 .color1 .area { fill: #1f77b4; }
 
-.color2 .stroke { stroke: #aec7e8; }
-.color2 .area { fill: #aec7e8; }
+.color2 .stroke { stroke: #ff7f0e; }
+.color2 .area { fill: #ff7f0e; }
 
-.color3 .stroke { stroke: #ff7f0e; }
-.color3 .area { fill: #ff7f0e; }
+.color3 .stroke { stroke: #2ca02c; }
+.color3 .area { fill: #2ca02c; }
 
-.color4 .stroke { stroke: #ffbb78; }
-.color4 .area { fill: #ffbb78; }
+.color4 .stroke { stroke: #d62728; }
+.color4 .area { fill: #d62728; }
 
-.color5 .stroke { stroke: #2ca02c; }
-.color5 .area { fill: #2ca02c; }
+.color5 .stroke { stroke: #9467bd; }
+.color5 .area { fill: #9467bd; }
 
-.color6 .stroke { stroke: #98df8a; }
-.color6 .area { fill: #98df8a; }
+.color6 .stroke { stroke: #8c564b; }
+.color6 .area { fill: #8c564b; }
 
-.color7 .stroke { stroke: #d62728; }
-.color7 .area { fill: #d62728; }
+.color7 .stroke { stroke: #e377c2; }
+.color7 .area { fill: #e377c2; }
 
-.color8 .stroke { stroke: #ff9896; }
-.color8 .area { fill: #ff9896; }
+.color8 .stroke { stroke: #bcbd22; }
+.color8 .area { fill: #bcbd22; }
 
-.color9 .stroke { stroke: #9467bd; }
-.color9 .area { fill: #9467bd; }
-
-.color10 .stroke { stroke: #c5b0d5; }
-.color10 .area { fill: #c5b0d5; }
-
-.color11 .stroke { stroke: #8c564b; }
-.color11 .area { fill: #8c564b; }
-
-.color12 .stroke { stroke: #c49c94; }
-.color12 .area { fill: #c49c94; }
+.color9 .stroke { stroke: #17becf; }
+.color9 .area { fill: #17becf; }

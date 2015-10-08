@@ -15,21 +15,27 @@
 
 (defmulti render (fn [t _ _] t))
 
-(defmethod render :point [_ emit {:keys [id x y] :as pt}]
-  [:circle {:class "point"
-            :cx x :cy y :r 5
-            :onmousedown #(do
-                            (.stopPropagation %)
-                            (emit [:hold id]))
-            :onmouseup #(do
-                          (.stopPropagation %)
-                          (emit [:release id]))}])
+(defmethod render :point [_ emit {:keys [id x y label] :as pt}]
+  [:g {:class "point" :transform (str "translate(" x "," y ")")}
+   [:text {:class "stroke" :dy -10} label]
+   [:text {:dy -10} label]
+   [:circle {:class "point"
+             :r 5
+             :onmousedown #(do
+                             (.stopPropagation %)
+                             (emit [:hold id]))
+             :onmouseup #(do
+                           (.stopPropagation %)
+                           (emit [:release id]))}]])
 
-(defmethod render :line [_ emit {:keys [p1 p2]}]
+(defmethod render :line [_ emit {:keys [id p1 p2]}]
   [:g {:class "line"}
    [:path {:class "stroke"
            :d (path [(extended p2 p1)
-                     (extended p1 p2)])}]])
+                     (extended p1 p2)])
+           :onmousedown #(do
+                           (.stopPropagation %)
+                           (emit [:select id]))}]])
 
 (defmethod render :line-segment [_ emit {:keys [p1 p2]}]
   [:g {:class "line-segment"}

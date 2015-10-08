@@ -25,26 +25,29 @@
 (defn pos [e]
   (cursor (workspace) (.-clientX e) (.-clientY e)))
 
+(def xy (juxt #(.-x %) #(.-y %)))
+
 (defn point? [{t :type}]
   (= :point t))
 
 (defn kernel [shape]
   (dissoc shape :id :type))
 
-(defn actualize [shapes shape]
-  (walk/postwalk
-    #(if (symbol? %)
-       (kernel (shapes %))
-       %)
-    (kernel shape)))
+(defn actualize [shapes {:keys [id] :as shape}]
+  (let [core (walk/postwalk
+               #(if (symbol? %)
+                  (kernel (shapes %))
+                  %)
+               (kernel shape))]
+    (assoc core :id id)))
 
 (defn shapify [sh color]
   (update-in sh [1 :class] str " shape " (if color (name color) "")))
 
 (defn ui [actions]
   (let [emit (partial put! actions)]
-    (fn [{:keys [shapes holding history anti-history tool grid-spacing]}]
-      [:main {}
+    (fn [{:keys [shapes holding history anti-history tool grid-spacing show-labels?]}]
+      [:main {:className (if show-labels? "labeled")}
        [:section {:className "sidebar"}
         [:div {:className "inside"}
          [:h1 {} "Taxicabland"]
@@ -64,6 +67,9 @@
          [:div {:id "options"}
           (if (seq history) [:button {:onclick #(emit :undo)} "Undo"])
           (if (seq anti-history) [:button {:onclick #(emit :redo)} "Redo"])
+          (if show-labels?
+            [:button {:onclick #(emit [:show-labels false])} "Hide labels"]
+            [:button {:onclick #(emit [:show-labels true])} "Show labels"])
           [:button {:onclick #(emit :save-image)} "Save Image"]
           [:button {:onclick #(emit :clear)} "Clear Workspace"]
           [:div {:className "widget"}
@@ -74,8 +80,8 @@
         [:div {:className "maximize"}
          [:svg {:id "workspace"
                 :onmousemove #(when holding (emit [:move (pos %)]))
-                :onmouseup #(emit [:release nil])
-                :onmousedown #(emit [:add-point (pos %)])}
+                :onmouseup #(emit :release)
+                :onmousedown #(emit [:add-point (xy (pos %))])}
           (when-let [svg (.getElementById js/document "workspace")]
             (when (< 2 grid-spacing)
               (let [[w h] (size svg)]
@@ -98,17 +104,20 @@
                 :alt "Fork me on GitHub"
                 :attributes {:data-canonical-src "https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"}}]]]])))
 
+(defn color? [{t :type}]
+  (not (contains? #{:point :line :line-segment :ray :parallel} t)))
+
 (defn add-shape [model {:keys [id] :as shape}]
   (cond
     (nil? shape)
     model
 
-    (or (point? shape) (get-in model [:shapes id]))
-    (assoc-in model [:shapes id] shape)
+    (and (nil? (get-in model [:shapes id])) (color? shape))
+    (assoc-in (update model :colors rest) [:shapes id]
+              (assoc shape :color (first (model :colors))))
 
     :else
-    (assoc-in (update model :colors rest) [:shapes id]
-              (assoc shape :color (first (model :colors))))))
+    (assoc-in model [:shapes id] shape)))
 
 (defn apply-tool [{{tool :handler} :tool :as model} point]
   (let [[t sh] (tool point)]
@@ -123,7 +132,7 @@
   (js/saveSvgAsPng (workspace) "taxicab.png" (clj->js {:scale scale})))
 
 (defn history-snapshot [m]
-  (select-keys m [:points :shapes]))
+  (select-keys m [:shapes]))
 
 (defn push-history [m]
   (update m :history conj (history-snapshot m)))
@@ -144,27 +153,52 @@
        (.round js/Math x)
        (* x spacing))))
 
+(defn map-vals [m f]
+  (zipmap (keys m) (map f (vals m))))
+
+(defn clear-selection [{:keys [selected] :as model}]
+  (if selected
+    (-> model
+      (update-in [:shapes selected] dissoc :selected?)
+      (assoc :selected nil))
+    model))
+
+(defn toggle-selection [model id selected]
+  (if (not= id selected)
+    (-> model
+      clear-selection
+      (assoc :selected id)
+      (assoc-in [:shapes id :selected?] true))
+    model))
+
+(defn add-point [model x y]
+  (let [id (gensym "point")
+        sn (snap (:grid-spacing model))]
+    (-> model
+      push-history
+      clear-selection
+      (add-shape {:id id
+                  :type :point
+                  :label (first (model :labels))
+                  :x (sn x)
+                  :y (sn y)})
+      (assoc :holding id)
+      (update :labels rest)
+      (apply-tool id))))
+
 (defn step [model action]
   (match action
     :no-op model
     :clear (-> model
              push-history
-             (assoc :points {} :shapes {}))
+             (assoc :shapes {}))
     :save-image (do (capture 3) model)
     :undo (shift-history model :history :anti-history)
     :redo (shift-history model :anti-history :history)
+    [:show-labels v] (assoc model :show-labels? v)
     [:grid size] (assoc model :grid-spacing size)
     [:tool tool] (assoc model :tool tool)
-    [:add-point loc] (let [id (gensym "point")
-                           sn (snap (:grid-spacing model))]
-                       (-> model
-                         push-history
-                         (add-shape {:id id
-                                     :type :point
-                                     :x (sn (.-x loc))
-                                     :y (sn (.-y loc))})
-                         (assoc :holding id)
-                         (apply-tool id)))
+    [:add-point [x y]] (add-point model x y)
     [:hold id] (-> model
                  push-history
                  (assoc :holding id)
@@ -175,13 +209,25 @@
                                (sn (.-x loc))
                                (sn (.-y loc))))
                   model)
-    [:release id] (assoc model :holding nil)))
+    :release (assoc model :holding nil)
+    [:release id] (let [current (model :selected)]
+                    (-> model
+                      (assoc :holding nil)
+                      clear-selection
+                      (toggle-selection id current)))
+    [:select id] (let [current (model :selected)]
+                    (-> model
+                    clear-selection
+                    (toggle-selection id current)))))
 
 (def initial-model
   {:shapes {}
    :holding nil
+   :selected nil
    :tool (first tools/tools)
-   :colors (cycle (map #(keyword (str "color" %)) (range 1 13)))
+   :colors (cycle (map #(keyword (str "color" %)) (range 1 10)))
+   :labels (cycle "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+   :show-labels? true
    :grid-spacing 15
    :history []
    :anti-history []})
