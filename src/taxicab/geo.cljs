@@ -1,8 +1,6 @@
 (ns taxicab.geo
   (:require-macros [taxicab.macros :refer [spy]]))
 
-(def xy (juxt :x :y))
-
 (def abs #(.abs js/Math %))
 
 (defn slope [{x1 :x y1 :y} {x2 :x y2 :y}]
@@ -33,29 +31,6 @@
 
 (defn dist-line [p l]
   (dist p (nearest p l)))
-
-(defn pair [[x y]]
-  (str x "," y))
-
-(defn append [x xs]
-  (concat xs [x]))
-
-(defn path
-  ([pts]
-   (when (seq pts)
-     (->> pts
-       (map xy)
-       (map pair)
-       (interpose "L")
-       (apply str "M"))))
-  ([pts close?]
-   (when (seq pts)
-     (->> pts
-       (map xy)
-       (map pair)
-       (interpose "L")
-       (append "Z")
-       (apply str "M")))))
 
 (defn avg [& xs]
   (/ (reduce + xs) (count xs)))

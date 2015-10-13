@@ -3,6 +3,7 @@
   (:require [clojure.walk :as walk]
             [cljs.core.async :as async :refer [put!]]
             [taxicab.tools :as tools]
+            [taxicab.geo :as geo :refer [extended]]
             [taxicab.shapes :as shapes]))
 
 (defn cursor [svg x y]
@@ -20,7 +21,7 @@
 (defn pos [e]
   (cursor (workspace) (.-clientX e) (.-clientY e)))
 
-(def xy (juxt #(.-x %) #(.-y %)))
+(def loc-xy (juxt #(.-x %) #(.-y %)))
 
 (defn point? [{t :type}]
   (= :point t))
@@ -68,11 +69,63 @@
       (walk/postwalk actual x)
       (assoc x :id id))))
 
+(defn pair [[x y]]
+  (str x "," y))
+
+(def xy (juxt :x :y))
+
+(defn append [x xs]
+  (concat xs [x]))
+
+(defn path
+  ([pts]
+   (when (seq pts)
+     (->> pts
+       (map xy)
+       (map pair)
+       (interpose "L")
+       (apply str "M"))))
+  ([pts close?]
+   (when (seq pts)
+     (->> pts
+       (map xy)
+       (map pair)
+       (interpose "L")
+       (append "Z")
+       (apply str "M")))))
+
+(defn sweep
+  ([v r]
+   [:path {:class "stroke"
+           :d (path [v (extended v r)])}])
+  ([v r1 r2]
+   (if (geo/collinear? v r1 r2)
+     [:path {:class "stroke"
+             :d (path [(extended v r1) (extended v r2)])}]
+     [:path {:class "area"
+             :d (path (geo/area v r1 r2) true)}])))
+
+(defn stroked [x]
+  [:g {:class "stroked"} x x])
+
 (defn shape->svg [{t :type :keys [color] :as sh}]
-  [:g {:class (str (if (= :point t) "point" "shape") " "
-                   (name t) " "
-                   (if color (name color)))}
-   (shapes/shape sh)])
+  (let [{{:keys [x y]} :center :as shape} (shapes/shape sh)]
+    [:g {:class (str (if (not= :point t) "shape") " "
+                     (name t) " "
+                     (if color (name color)))
+         :transform (if (and x y) (str "translate(" x "," y ")"))}
+     (for [{:keys [x y text]} (shape :labels)]
+       (stroked [:text {:dx x :dy y} text]))
+     (for [a (shape :areas)]
+       [:path {:class "area" :d (path a)}])
+     (for [s (shape :sweeps)]
+       (apply sweep (flatten s)))
+     (for [s (shape :strokes)]
+       [:path {:class "stroke" :d (path s)}])
+     (for [l (shape :loops)]
+       [:path {:class "stroke" :d (path l true)}])
+     (for [{:keys [x y]} (shape :points)]
+       [:circle {:class "area" :r 5 :cx x :cy y}])]))
 
 (defn main [{:keys [shapes holding selected tool grid-spacing show-labels?] :as model} actions]
   (let [emit (partial put! actions)]
@@ -89,7 +142,7 @@
        [:svg {:id "workspace"
               :onmousemove #(when holding (emit [:move (pos %)]))
               :onmouseup #(emit :release)
-              :onmousedown #(emit [:add-point (xy (pos %))])}
+              :onmousedown #(emit [:add-point (loc-xy (pos %))])}
         (grid (workspace) grid-spacing)
         (let [selection (actualize shapes (shapes selected))
               shapes (map (partial actualize shapes) (vals shapes))
