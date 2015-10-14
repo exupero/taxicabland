@@ -21,7 +21,8 @@
 
 (defmethod shape :parallel [{:keys [p1 p2 k]}]
   (let [k' (step k 1 (geo/slope p1 p2))]
-    {:strokes [[(extended k k') (extended k' k)]]}))
+    {:strokes [[(extended k k') (extended k' k)]]
+     :guides [[(extended p1 p2) (extended p2 p1)]]}))
 
 (defmethod shape :midset [{:keys [p1 p2]}]
   (let [eq #(geo/eq? (dist p1 %) (dist p2 %))
@@ -32,22 +33,24 @@
     {:strokes [[c1 c2]]
      :sweeps [[c1 (ex c1)]
               (when (not= c1 c2)
-                [c2 (ex c2)])]}))
+                [c2 (ex c2)])]
+     :guides [[p1 p2]]}))
 
 (defmethod shape :perpendicular [{:keys [p1 p2 k]}]
   (let [slope (geo/slope p1 p2)]
-    (cond
-      (= 1 slope)
-      {:sweeps [[k (step k 1 0) (step k 0 -1)]
-                [k (step k -1 0) (step k 0 1)]]}
+    {:sweeps (cond
+               (= 1 slope)
+               [[k (step k 1 0) (step k 0 -1)]
+                [k (step k -1 0) (step k 0 1)]]
 
-      (= -1 slope)
-      {:sweeps [[k (step k -1 0) (step k 0 -1)]
-                [k (step k 1 0) (step k 0 1)]]}
+               (= -1 slope)
+               [[k (step k -1 0) (step k 0 -1)]
+                [k (step k 1 0) (step k 0 1)]]
 
-      :else
-      (let [i (geo/nearest k [p1 p2])]
-        {:sweeps [[k (extended i k) (extended k i)]]}))))
+               :else
+               (let [i (geo/nearest k [p1 p2])]
+                 [[k (extended i k) (extended k i)]]))
+     :guides [[(extended p1 p2) (extended p2 p1)]]}))
 
 (defmethod shape :bisect [{:keys [r1 v r2]}]
   (let [intersect (fn [r]
@@ -57,7 +60,9 @@
         c1 (intersect r1)
         c2 (intersect r2)
         m (midpoint c1 c2)]
-    {:strokes [[v (extended v m)]]}))
+    {:strokes [[v (extended v m)]]
+     :guides [[v (extended v r1)]
+              [v (extended v r2)]]}))
 
 (defmethod shape :circle [{:keys [c r]}]
   {:loops [(cardinal c (dist c r))]})
@@ -83,18 +88,19 @@
 
 (defmethod shape :parabola [{:keys [f d1 d2]}]
   (let [eq #(geo/eq? (dist % f) (geo/dist-line % [d1 d2]))]
-    (if (= 1 (geo/abs (geo/slope d1 d2)))
-      (let [m1 (midpoint f (geo/intersection [d1 d2] [f (step f 1 0)]))
-            m2 (midpoint f (geo/intersection [d1 d2] [f (step f 0 1)]))
-            [c1] (filter eq (cardinal m1 1))
-            [c2] (filter eq (cardinal m2 1))]
-        {:strokes [[(extended m1 c1) m1 m2 (extended m2 c2)]]})
-      (let [m (midpoint f (geo/nearest f [d1 d2]))
-            i1 (geo/intersection [d1 d2] [f (step f 1 1)])
-            i2 (geo/intersection [d1 d2] [f (step f 1 -1)])
-            [c1] (filter eq (geo/corners f i1))
-            [c2] (filter eq (geo/corners f i2))]
-        {:strokes [[(extended i1 c1) c1 m c2 (extended i2 c2)]]}))))
+    {:strokes (if (= 1 (geo/abs (geo/slope d1 d2)))
+                (let [m1 (midpoint f (geo/intersection [d1 d2] [f (step f 1 0)]))
+                      m2 (midpoint f (geo/intersection [d1 d2] [f (step f 0 1)]))
+                      [c1] (filter eq (cardinal m1 1))
+                      [c2] (filter eq (cardinal m2 1))]
+                  [[(extended m1 c1) m1 m2 (extended m2 c2)]])
+                (let [m (midpoint f (geo/nearest f [d1 d2]))
+                      i1 (geo/intersection [d1 d2] [f (step f 1 1)])
+                      i2 (geo/intersection [d1 d2] [f (step f 1 -1)])
+                      [c1] (filter eq (geo/corners f i1))
+                      [c2] (filter eq (geo/corners f i2))]
+                  [[(extended i1 c1) c1 m c2 (extended i2 c2)]]))
+     :guides [[(extended d1 d2) (extended d2 d1)]]}))
 
 (defmethod shape :hyperbola [{:keys [f1 f2 k]}]
   (let [metric #(geo/abs (- (dist % f1) (dist % f2)))

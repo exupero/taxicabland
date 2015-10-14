@@ -246,6 +246,12 @@ text::selection {
   fill: black;
 }
 
+.guide {
+  stroke: gray;
+  stroke-width: 1.2;
+  stroke-dasharray: 5 2;
+}
+
 .join {
   stroke-linecap: square;
 }

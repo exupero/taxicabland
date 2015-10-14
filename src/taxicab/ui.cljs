@@ -4,7 +4,8 @@
             [cljs.core.async :as async :refer [put!]]
             [taxicab.tools :as tools]
             [taxicab.geo :as geo :refer [extended]]
-            [taxicab.shapes :as shapes]))
+            [taxicab.shapes :as shapes]
+            [taxicab.events :refer [without-propagation]]))
 
 (defn cursor [svg x y]
   (let [c (.createSVGPoint svg)]
@@ -108,22 +109,28 @@
 (defn stroked [x]
   [:g {:class "stroked"} x x])
 
-(defn shape->svg [{t :type :keys [color] :as sh}]
+(defn shape->svg [{t :type :keys [id color selected?] :as sh} emit]
   (let [{{:keys [x y]} :center :as shape} (shapes/shape sh)]
     [:g {:class (str (if (not= :point t) "shape") " "
                      (name t) " "
                      (if color (name color)))
          :transform (if (and x y) (str "translate(" x "," y ")"))}
+     (when selected?
+       (for [g (shape :guides)]
+         [:path {:class "guide" :d (path g)}]))
      (for [{:keys [x y text]} (shape :labels)]
        (stroked [:text {:dx x :dy y} text]))
      (for [a (shape :areas)]
-       [:path {:class "area" :d (path a)}])
+       [:path {:class "area" :d (path a)
+               :onmousedown (without-propagation #(emit [:select id]))}])
      (for [s (shape :sweeps)]
        (apply sweep (flatten s)))
      (for [s (shape :strokes)]
-       [:path {:class "stroke" :d (path s)}])
+       [:path {:class "stroke" :d (path s)
+               :onmousedown (without-propagation #(emit [:select id]))}])
      (for [l (shape :loops)]
-       [:path {:class "stroke" :d (path l true)}])
+       [:path {:class "stroke" :d (path l true)
+               :onmousedown (without-propagation #(emit [:select id]))}])
      (for [{:keys [x y]} (shape :points)]
        [:circle {:class "area" :r 5 :cx x :cy y}])]))
 
@@ -146,9 +153,9 @@
         (grid (workspace) grid-spacing)
         (let [selection (actualize shapes (shapes selected))
               shapes (map (partial actualize shapes) (vals shapes))
-              shape (fn [{t :type :keys [id color] :as sh}]
+              shape (fn [{:keys [id color] :as sh}]
                       (if id
-                        (shape->svg sh)))]
+                        (shape->svg sh emit)))]
           (list
             (map shape (->> shapes (remove point?) (remove :selected?)))
             (shape selection)
