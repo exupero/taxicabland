@@ -6,22 +6,24 @@
 (defmulti shape (fn [{t :type} _] t))
 
 (defmethod shape :point [{:keys [id x y label] :as pt}]
-  {:center {:x x :y y}
-   :points [{:x 0 :y 0}]
-   :labels [{:x 0 :y -10 :text label}]})
+  {:points [{:x x :y y :label label}]})
 
 (defmethod shape :line [{:keys [id p1 p2]}]
-  {:strokes [[(extended p2 p1) (extended p1 p2)]]})
+  {:strokes [[(extended p2 p1) (extended p1 p2)]]
+   :defining-points [p1 p2]})
 
 (defmethod shape :line-segment [{:keys [p1 p2]}]
-  {:strokes [[p1 p2]]})
+  {:strokes [[p1 p2]]
+   :defining-points [p1 p2]})
 
 (defmethod shape :ray [{:keys [p1 p2]}]
-  {:strokes [[p1 (extended p1 p2)]]})
+  {:strokes [[p1 (extended p1 p2)]]
+   :defining-points [p1 p2]})
 
 (defmethod shape :parallel [{:keys [p1 p2 k]}]
   (let [k' (step k 1 (geo/slope p1 p2))]
     {:strokes [[(extended k k') (extended k' k)]]
+     :defining-points [p1 p2 k]
      :guides [[(extended p1 p2) (extended p2 p1)]]}))
 
 (defmethod shape :midset [{:keys [p1 p2]}]
@@ -34,6 +36,7 @@
      :sweeps [[c1 (ex c1)]
               (when (not= c1 c2)
                 [c2 (ex c2)])]
+     :defining-points [p1 p2]
      :guides [[p1 p2]]}))
 
 (defmethod shape :perpendicular [{:keys [p1 p2 k]}]
@@ -50,6 +53,7 @@
                :else
                (let [i (geo/nearest k [p1 p2])]
                  [[k (extended i k) (extended k i)]]))
+     :defining-points [p1 p2 k]
      :guides [[(extended p1 p2) (extended p2 p1)]]}))
 
 (defmethod shape :bisect [{:keys [r1 v r2]}]
@@ -61,11 +65,13 @@
         c2 (intersect r2)
         m (midpoint c1 c2)]
     {:strokes [[v (extended v m)]]
+     :defining-points [r1 v r2]
      :guides [[v (extended v r1)]
               [v (extended v r2)]]}))
 
 (defmethod shape :circle [{:keys [c r]}]
-  {:loops [(cardinal c (dist c r))]})
+  {:loops [(cardinal c (dist c r))]
+   :defining-points [(assoc c :role "Center") r]})
 
 (defmethod shape :ellipse [{:keys [f1 f2 k]}]
   (let [{x1 :x y1 :y} f1
@@ -84,7 +90,10 @@
               {:x (+ x2 r) :y y1}
               {:x x2 :y (- y1 r)}
               {:x x1 :y (- y1 r)}
-              {:x (- x1 r) :y y1}]]}))
+              {:x (- x1 r) :y y1}]]
+     :defining-points [(assoc f1 :role "Focus")
+                       (assoc f2 :role "Focus")
+                       k]}))
 
 (defmethod shape :parabola [{:keys [f d1 d2]}]
   (let [eq #(geo/eq? (dist % f) (geo/dist-line % [d1 d2]))]
@@ -100,6 +109,7 @@
                       [c1] (filter eq (geo/corners f i1))
                       [c2] (filter eq (geo/corners f i2))]
                   [[(extended i1 c1) c1 m c2 (extended i2 c2)]]))
+     :defining-points [(assoc f :role "Focus") d1 d2]
      :guides [[(extended d1 d2) (extended d2 d1)]]}))
 
 (defmethod shape :hyperbola [{:keys [f1 f2 k]}]
@@ -109,9 +119,12 @@
         eq #(geo/eq? d (metric %))
         hyp #(->> (cardinal % 5)
                (filter eq)
-               (vector %))]
+               (vector %))
+        dp [(assoc f1 :role "Focus")
+            (assoc f2 :role "Focus")]]
     (if (zero? r)
-      {:sweeps [(hyp f1) (hyp f2)]}
+      {:sweeps [(hyp f1) (hyp f2)]
+       :defining-points dp}
       (let [wing (fn [a b]
                    (let [[dx dy] (map (partial * r) (geo/direction a b))
                          exs (->> (geo/bounding f1 f2)
@@ -119,7 +132,8 @@
                                (filter #(and (eq %) (geo/eq? r (dist a %)))))]
                      {:strokes [exs]
                       :sweeps (map hyp exs)}))]
-        (merge-with concat (wing f1 f2) (wing f2 f1))))))
+        (merge (merge-with concat (wing f1 f2) (wing f2 f1))
+               {:defining-points dp})))))
 
 (defmethod shape :mindist [{:keys [points]}]
   (if (even? (count points))
@@ -131,6 +145,8 @@
                 {:x m1x :y m2y}
                 {:x m2x :y m2y}
                 {:x m2x :y m1y}
-                {:x m1x :y m1y}]]})
+                {:x m1x :y m1y}]]
+       :defining-points points})
     (let [{:keys [x y]} (geo/middle points)]
-      {:points [{:x x :y y}]})))
+      {:points [{:x x :y y}]
+       :defining-points points})))

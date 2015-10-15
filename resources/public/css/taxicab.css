@@ -230,7 +230,7 @@ text::selection {
   cursor: pointer;
 }
 
-.point {
+.point circle {
   stroke: white;
   stroke-width: 1;
 }
@@ -238,12 +238,22 @@ text::selection {
 .stroke {
   stroke: black;
   stroke-width: 2;
-  fill: none !important;
+  fill: none;
 }
 
 .area {
-  stroke: none !important;
+  stroke: none;
   fill: black;
+}
+
+text.role {
+  font-style: italic;
+}
+
+.highlight .point {
+  stroke: black;
+  stroke-width: 2;
+  fill: white;
 }
 
 .guide {

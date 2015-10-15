@@ -109,30 +109,38 @@
 (defn stroked [x]
   [:g {:class "stroked"} x x])
 
-(defn shape->svg [{t :type :keys [id color selected?] :as sh} emit]
-  (let [{{:keys [x y]} :center :as shape} (shapes/shape sh)]
+(defn shape->svg [{:keys [points] :as shape} {t :type :keys [id color selected?]} emit]
+  (let [select-this (without-propagation #(emit [:select id]))]
     [:g {:class (str (if (not= :point t) "shape") " "
                      (name t) " "
-                     (if color (name color)))
-         :transform (if (and x y) (str "translate(" x "," y ")"))}
-     (when selected?
-       (for [g (shape :guides)]
-         [:path {:class "guide" :d (path g)}]))
-     (for [{:keys [x y text]} (shape :labels)]
-       (stroked [:text {:dx x :dy y} text]))
+                     (if color (name color)))}
+     (for [{:keys [x y label]} points]
+       (stroked [:text {:x x :y y :dy -10} label]))
      (for [a (shape :areas)]
        [:path {:class "area" :d (path a)
-               :onmousedown (without-propagation #(emit [:select id]))}])
+               :onmousedown select-this}])
      (for [s (shape :sweeps)]
-       (apply sweep (flatten s)))
+       (assoc-in (apply sweep (flatten s)) [1 :onmousedown] select-this))
      (for [s (shape :strokes)]
        [:path {:class "stroke" :d (path s)
-               :onmousedown (without-propagation #(emit [:select id]))}])
+               :onmousedown select-this}])
      (for [l (shape :loops)]
        [:path {:class "stroke" :d (path l true)
-               :onmousedown (without-propagation #(emit [:select id]))}])
-     (for [{:keys [x y]} (shape :points)]
-       [:circle {:class "area" :r 5 :cx x :cy y}])]))
+               :onmousedown select-this}])
+     (for [{:keys [x y]} points]
+       [:circle {:class "area" :r 5 :cx x :cy y
+                 :onmousedown select-this}])
+     (when selected?
+       (for [{:keys [x y role] :as p} (shape :defining-points)]
+         (list
+           (stroked [:text {:class "role" :x x :y y :dy 21} role]))))]))
+
+(defn shape->highlight [shape {t :type :keys [color]} _]
+  [:g {:class (str "highlight " (name t))}
+   (for [g (shape :guides)]
+     [:path {:class "guide" :d (path g)}])
+   (for [{:keys [x y role] :as p} (shape :defining-points)]
+     [:circle {:class "point" :r 7 :cx x :cy y}])])
 
 (defn main [{:keys [shapes holding selected tool grid-spacing show-labels?] :as model} actions]
   (let [emit (partial put! actions)]
@@ -151,12 +159,16 @@
               :onmouseup #(emit :release)
               :onmousedown #(emit [:add-point (loc-xy (pos %))])}
         (grid (workspace) grid-spacing)
-        (let [selection (actualize shapes (shapes selected))
-              shapes (map (partial actualize shapes) (vals shapes))
-              shape (fn [{:keys [id color] :as sh}]
-                      (if id
-                        (shape->svg sh emit)))]
+        (let [shape (fn [sh]
+                      (when (sh :id)
+                        (shape->svg (shapes/shape sh) sh emit)))
+              shapes (map (partial actualize shapes) (vals shapes))]
           (list
             (map shape (->> shapes (remove point?) (remove :selected?)))
-            (shape selection)
+            (when-let [sh (first (filter :selected? shapes))]
+              (when (sh :type)
+                (let [sel (shapes/shape sh)]
+                  (list
+                    (shape->highlight sel sh emit)
+                    (shape->svg sel sh emit)))))
             (map shape (filter point? shapes))))]]]]))

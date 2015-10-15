@@ -8,9 +8,9 @@
                  [org.clojure/core.match  "0.3.0-alpha4"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljsjs/virtual-dom "0.1.0-0"]
-                 [vdom "0.1.0-SNAPSHOT"]]
+                 [vdom "0.1.1-SNAPSHOT"]]
   :plugins [[lein-cljsbuild "0.3.2"]
-            [lein-figwheel "0.3.7"]]
+            [lein-figwheel "0.4.0"]]
   :cljsbuild {:builds {:dev {:source-paths ["src"]
                              :incremental true
                              :jar true
@@ -33,7 +33,7 @@
                               :compiler {:output-to "resources/public/js/taxicab.js"
                                          :warnings true
                                          :elide-asserts true
-                                         :externs ["externs/vdom.js" "externs/svg.js"]
+                                         :externs ["externs/svg.js"]
                                          :optimizations :advanced
                                          :pretty-print false
                                          :output-wrapper false}}}}
