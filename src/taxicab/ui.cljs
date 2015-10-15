@@ -129,7 +129,8 @@
                :onmousedown select-this}])
      (for [{:keys [x y]} points]
        [:circle {:class "area" :r 5 :cx x :cy y
-                 :onmousedown select-this}])
+                 :onmousedown (without-propagation #(emit [:hold id]))
+                 :onmouseup #(emit :release)}])
      (when selected?
        (for [{:keys [x y role] :as p} (shape :defining-points)]
          (list
