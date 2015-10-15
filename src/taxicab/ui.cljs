@@ -115,7 +115,7 @@
                      (name t) " "
                      (if color (name color)))}
      (for [{:keys [x y label]} points]
-       (stroked [:text {:x x :y y :dy -10} label]))
+       (stroked [:text {:class "label" :x x :y y :dy -10} label]))
      (for [a (shape :areas)]
        [:path {:class "area" :d (path a)
                :onmousedown select-this}])
@@ -136,10 +136,12 @@
          (list
            (stroked [:text {:class "role" :x x :y y :dy 21} role]))))]))
 
-(defn shape->highlight [shape {t :type :keys [color]} _]
+(defn shape->guides [shape _ _]
+  (for [g (shape :guides)]
+    [:path {:class "guide" :d (path g)}]))
+
+(defn shape->point-highlight [shape {t :type :keys [color]} _]
   [:g {:class (str "highlight " (name t))}
-   (for [g (shape :guides)]
-     [:path {:class "guide" :d (path g)}])
    (for [{:keys [x y role] :as p} (shape :defining-points)]
      [:circle {:class "point" :r 7 :cx x :cy y}])])
 
@@ -152,7 +154,8 @@
        [:a {:id "explain" :href "https://en.wikipedia.org/wiki/Taxicab_geometry"} "What is taxicab geometry?"]
        [:div {:id "tip"} "Drag points with the Point tool."]
        (tools-bar tools/tools tool emit)
-       (options model emit)]]
+       (options model emit)
+       [:a {:id "source" :href "https://github.com/exupero/taxicabland"} "GitHub"]]]
      [:section {:className "main"}
       [:div {:className "maximize"}
        [:svg {:id "workspace"
@@ -170,6 +173,7 @@
               (when (sh :type)
                 (let [sel (shapes/shape sh)]
                   (list
-                    (shape->highlight sel sh emit)
-                    (shape->svg sel sh emit)))))
+                    (shape->guides sel sh emit)
+                    (shape->svg sel sh emit)
+                    (shape->point-highlight sel sh emit)))))
             (map shape (filter point? shapes))))]]]]))
