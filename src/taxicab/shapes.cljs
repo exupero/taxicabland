@@ -136,17 +136,19 @@
                {:defining-points dp})))))
 
 (defmethod shape :mindist [{:keys [points]}]
-  (if (even? (count points))
-    (let [[m1 m2] (geo/middle-2 points)
-          {m1x :x m1y :y} m1
-          {m2x :x m2y :y} m2
-          m (midpoint m1 m2)]
-      {:areas [[{:x m1x :y m1y}
-                {:x m1x :y m2y}
-                {:x m2x :y m2y}
-                {:x m2x :y m1y}
-                {:x m1x :y m1y}]]
-       :defining-points points})
-    (let [{:keys [x y]} (geo/middle points)]
-      {:points [{:x x :y y}]
-       :defining-points points})))
+  (merge {:defining-points points}
+         (if (even? (count points))
+           (let [[m1 m2] (geo/middle-2 points)
+                 {m1x :x m1y :y} m1
+                 {m2x :x m2y :y} m2
+                 vert (= m1x m2x)
+                 horiz (= m1y m2y)]
+             (cond
+               (and vert horiz) {:points [m1]}
+               (or vert horiz)  {:strokes [[m1 m2]]}
+               :else            {:areas [[{:x m1x :y m1y}
+                                          {:x m1x :y m2y}
+                                          {:x m2x :y m2y}
+                                          {:x m2x :y m1y}
+                                          {:x m1x :y m1y}]]}))
+           {:points [(geo/middle points)]})))
