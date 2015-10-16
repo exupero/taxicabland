@@ -152,7 +152,7 @@
       [:div {:className "inside"}
        [:h1 {} "Taxicabland"]
        [:a {:id "explain" :href "https://en.wikipedia.org/wiki/Taxicab_geometry"} "What is taxicab geometry?"]
-       [:div {:id "tip"} "Drag points with the Point tool."]
+       [:div {:id "tip"} "Select shapes to see what points define them."]
        (tools-bar tools/tools tool emit)
        (options model emit)
        [:a {:id "source" :href "https://github.com/exupero/taxicabland"} "GitHub"]]]

@@ -17,10 +17,12 @@
 
 (defn nearest [{:keys [x y]} [p1 p2]]
   (let [m (slope p1 p2)
+        am (abs m)
         b (intercept m p1)]
-    (if (< 1 (abs m))
-      {:x ((line-inverse m b) y) :y y}
-      {:x x :y ((line m b) x)})))
+    (cond
+      (= js/Infinity am) {:x (p1 :x) :y y}
+      (< 1 am)           {:x ((line-inverse m b) y) :y y}
+      :else              {:x x :y ((line m b) x)})))
 
 (defn dist
   ([a b]
