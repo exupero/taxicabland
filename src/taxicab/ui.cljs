@@ -127,10 +127,12 @@
      (for [l (shape :loops)]
        [:path {:class "stroke" :d (path l true)
                :onmousedown select-this}])
-     (for [{:keys [x y]} points]
-       [:circle {:class "area" :r 5 :cx x :cy y
-                 :onmousedown (without-propagation #(emit [:hold id]))
-                 :onmouseup #(emit :release)}])
+     (for [{:keys [x y draggable?]} points
+           :let [events (if draggable?
+                          {:onmousedown (without-propagation #(emit [:hold id]))
+                           :onmouseup #(emit :release)}
+                          {:onmousedown (without-propagation #(emit [:select id]))})]]
+       [:circle (merge events {:class "area" :r 5 :cx x :cy y})])
      (when selected?
        (for [{:keys [x y role] :as p} (shape :defining-points)]
          (list

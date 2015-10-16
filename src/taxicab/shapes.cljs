@@ -6,7 +6,7 @@
 (defmulti shape (fn [{t :type} _] t))
 
 (defmethod shape :point [{:keys [id x y label] :as pt}]
-  {:points [{:x x :y y :label label}]})
+  {:points [{:x x :y y :label label :draggable? true}]})
 
 (defmethod shape :line [{:keys [id p1 p2]}]
   {:strokes [[(extended p2 p1) (extended p1 p2)]]
