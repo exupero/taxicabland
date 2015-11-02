@@ -78,22 +78,16 @@
 (defn append [x xs]
   (concat xs [x]))
 
-(defn path
-  ([pts]
-   (when (seq pts)
-     (->> pts
-       (map xy)
-       (map pair)
-       (interpose "L")
-       (apply str "M"))))
-  ([pts close?]
-   (when (seq pts)
-     (->> pts
-       (map xy)
-       (map pair)
-       (interpose "L")
-       (append "Z")
-       (apply str "M")))))
+(defn path [pts]
+  (when (seq pts)
+    (->> pts
+      (map xy)
+      (map pair)
+      (interpose "L")
+      (apply str "M"))))
+
+(defn closed-path [pts]
+  (str (path pts) "Z"))
 
 (defn sweep
   ([v r]
@@ -104,7 +98,7 @@
      [:path {:class "stroke"
              :d (path [(extended v r1) (extended v r2)])}]
      [:path {:class "area"
-             :d (path (geo/area v r1 r2) true)}])))
+             :d (closed-path (geo/area v r1 r2))}])))
 
 (defn stroked [x]
   [:g {:class "stroked"} x x])
@@ -125,7 +119,7 @@
        [:path {:class "stroke" :d (path s)
                :onmousedown select-this}])
      (for [l (shape :loops)]
-       [:path {:class "stroke" :d (path l true)
+       [:path {:class "stroke" :d (closed-path l)
                :onmousedown select-this}])
      (for [{:keys [x y draggable?]} points
            :let [events (if draggable?

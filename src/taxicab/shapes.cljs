@@ -21,10 +21,9 @@
    :defining-points [p1 p2]})
 
 (defmethod shape :parallel [{:keys [p1 p2 k]}]
-  (let [k' (step k 1 (geo/slope p1 p2))]
-    {:strokes [[(extended k k') (extended k' k)]]
-     :defining-points [p1 p2 k]
-     :guides [[(extended p1 p2) (extended p2 p1)]]}))
+  {:strokes [(geo/parallel p1 p2 k)]
+   :defining-points [p1 p2 k]
+   :guides [[(extended p1 p2) (extended p2 p1)]]})
 
 (defmethod shape :midset [{:keys [p1 p2]}]
   (let [eq #(geo/eq? (dist p1 %) (dist p2 %))
@@ -57,17 +56,24 @@
      :guides [[(extended p1 p2) (extended p2 p1)]]}))
 
 (defmethod shape :bisect [{:keys [r1 v r2]}]
-  (let [intersect (fn [r]
-                    (first
-                      (filter #(geo/on-ray? [v r] %)
-                        (geo/intersections-circle [v r] v 100))))
-        c1 (intersect r1)
-        c2 (intersect r2)
-        m (midpoint c1 c2)]
-    {:strokes [[v (extended v m)]]
+  (let [parallels (fn [a b s]
+                   (let [p (geo/parallel a b (step a s 0))]
+                     (if (geo/close? s (geo/dist-line a p))
+                       [p
+                        (geo/parallel a b (step a (- s) 0))]
+                       [(geo/parallel a b (step a 0 s))
+                        (geo/parallel a b (step a 0 (- s)))])))
+        interior? (fn [ray l]
+                    (geo/on-ray? ray (geo/intersection ray l)))
+        parallel (fn [v r1 r2]
+                   (->> (parallels v r1 1)
+                     (filter (partial interior? [v r2]))
+                     first))
+        i (geo/intersection (parallel v r1 r2) (parallel v r2 r1))]
+    {:strokes [[(extended v i) (extended i v)]]
      :defining-points [r1 v r2]
-     :guides [[v (extended v r1)]
-              [v (extended v r2)]]}))
+     :guides [[(extended r1 v) (extended v r1)]
+              [(extended r2 v) (extended v r2)]]}))
 
 (defmethod shape :circle [{:keys [c r]}]
   {:loops [(cardinal c (dist c r))]

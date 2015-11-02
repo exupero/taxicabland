@@ -160,3 +160,15 @@
   (let [dx (- x2 x1)
         dy (- y2 y1)]
     [(/ dx (abs dx)) (/ dy (abs dy))]))
+
+(defn parallel [a b k]
+  (let [m (slope a b)
+        k' (if (= js/Infinity (abs m))
+             (step k 0 1)
+             (step k 1 m))]
+    [(extended k k') (extended k' k)]))
+
+(defn close?
+  ([a b] (close? a b 0.001))
+  ([a b t]
+   (<= (- a t) b (+ a t))))

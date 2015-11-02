@@ -5,9 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.122" :exclusions [org.apache.ant/ant]]
-                 [org.clojure/core.match  "0.3.0-alpha4"]
+                 [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [cljsjs/virtual-dom "0.1.0-0"]
                  [vdom "0.1.1-SNAPSHOT"]]
   :plugins [[lein-cljsbuild "0.3.2"]
             [lein-figwheel "0.4.0"]]
@@ -16,7 +15,7 @@
                              :jar true
                              :assert true
                              :figwheel {:on-jsload "taxicab.core/figwheel-reload"}
-                             :compiler {:main taxicab.core
+                             :compiler {:main "taxicab.core"
                                         :output-to "resources/public/js-dev/taxicab.js"
                                         :output-dir "resources/public/js-dev"
                                         :asset-path "js-dev"
